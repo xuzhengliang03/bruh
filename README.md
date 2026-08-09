@@ -124,3 +124,40 @@ Among these highly reviewed listings:
 
 注意：CSV 数据文件不要上传到 GitHub，但 Orange workflow 可以上传。
 
+Deliverable 3: Christchurch Airbnb Analysis
+
+This analysis uses nine New Zealand Airbnb datasets from October 2025 to June 2026.
+
+本次分析使用了从 2025 年 10 月到 2026 年 6 月的九个月新西兰 Airbnb 数据。
+
+Data Processing / 数据处理
+
+Filtered all datasets to Christchurch City only.所有数据只保留 Christchurch City 的房源。
+
+Added month_year and scrape_date columns.添加月份年份和数据发布日期两列。
+
+Combined nine monthly datasets into one dataset.将九个月的数据合并为一个数据集。
+
+The combined dataset contains 28,795 rows and 21 columns.合并后的数据共有 28,795 行和 21 列。
+
+Calculated missing values and summary statistics for all columns.计算每一列的缺失值和汇总统计数据。
+
+Analysis Results / 分析结果
+
+Created a Christchurch Airbnb price distribution histogram.制作了 Christchurch Airbnb 价格分布直方图。
+
+Created a histogram showing days since the last review.计算距离最后一次评论的天数并制作直方图。
+
+For June 2026, the top 10% review threshold was 184 reviews.在 2026 年 6 月的数据中，评论数量前 10% 的门槛是至少 184 条评论。
+
+347 Christchurch listings were in the top 10%.共有 347 个 Christchurch 房源进入评论数量前 10%。
+
+Files / 文件说明
+
+Python analysis code / Python 分析代码：deliverable3.py
+
+Local combined dataset / 本地合并数据：christchurch_2025_10_to_2026_06.csv
+
+The large CSV datasets are stored locally and are not uploaded to GitHub.
+
+大型 CSV 数据保存在每位组员的本地电脑中，不上传到 GitHub。
