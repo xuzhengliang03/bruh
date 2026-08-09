@@ -219,3 +219,9 @@ __marimo__/
 
 # Large local Airbnb dataset
 listings.csv
+
+# Large local Airbnb datasets
+local_data/
+
+# PyCharm local settings
+.idea/
