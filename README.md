@@ -403,3 +403,31 @@ python deliverable4.py \
 The rental bond data is published by the Ministry of Business, Innovation and Employment under a Creative Commons Attribution 3.0 New Zealand licence.
 
 租赁押金数据由新西兰商业、创新和就业部发布，采用 Creative Commons Attribution 3.0 New Zealand 许可协议。
+------------------------week8------------------------------------------------
+## Deliverable 5: SA2 matching and rental comparison / 区域匹配与租金比较
+
+This ZIP includes the compressed prepared data, reproducible code and results. The original large downloads and the Koordinates API key are not included. / 本压缩包包含压缩后的已处理数据、可重复运行的代码和结果；不包含原始大型下载文件或 Koordinates API 密钥。
+
+### Files / 文件
+
+- `deliverable5_geocode.py`: queries Stats NZ SA2-2019 for each unique Airbnb coordinate, caches responses locally and saves `processed_data/christchurch_listings_with_sa2.csv.gz`. / 查询每个不同坐标的 SA2-2019 区号，并保存新增区域编号的房源数据。
+- `deliverable5_analysis.py`: joins Airbnb listing-month rows to quarterly bond summaries and writes the joined file, area comparison and analysis report. / 按区域及季度连接两份数据，输出连接表、各区域比较及分析报告。
+- `processed_data/airbnb_bond_joined.csv.gz`: listing-level left-join output, retaining all 28,795 Airbnb listing-month rows. / 保留全部 28,795 条房源月份记录的左连接结果。
+- `processed_data/area_comparison_latest_month.csv`: June 2026 Airbnb counts, prices and active bond counts by SA2. / 按 SA2 汇总的 2026 年 6 月房源数量、价格及活跃押金数量。
+- `processed_data/deliverable5_results.md`: detailed methods, findings and limitations. / 方法、结果及限制说明。
+
+### Method and findings / 方法与结果
+
+The bond source uses **SA2-2019** definitions, so the Koordinates layer `98970` (Statistical Area 2 2019, generalised) was used. Longitude is `x`, latitude is `y`; the single-point test returned SA2 `320800`. All 3,953 unique coordinates were queried and all 28,795 Airbnb rows received a `location_id`. / 押金数据使用 **SA2-2019** 定义，因此选用 Koordinates 图层 `98970`。`x` 为经度、`y` 为纬度；单点测试返回 `320800`。共查询 3,953 个不同坐标，28,795 条房源记录均获得区域编号。
+
+Airbnb months were mapped to calendar quarters. The bond table contains detail and subtotal rows, so only `dwelling_type=ALL` and `number_of_beds=ALL` were joined. A many-to-one **left join** retains Airbnb rows without a bond match; missing bond results must not be treated as zero. / 将 Airbnb 月份映射至自然季度；押金表只使用两个分类均为 `ALL` 的总计行，再按 `location_id` 和季度进行多对一左连接。无押金匹配的房源仍保留，缺失值不能解释为零。
+
+For June 2026, Christchurch Central (SA2 `326600`) has a median Airbnb asking price of **NZ$250 per night** from 117 priced listings. Among SA2 areas with at least 10 priced Airbnb listings, Holmwood (`322600`) has the largest median Airbnb-minus-bond-rent gap, **NZ$242.71 per night**, after converting weekly bond median rent to a nightly figure by dividing by seven. / 2026 年 6 月，Christchurch Central（`326600`）117 条有价格房源的挂牌价中位数为 **每晚 NZ$250**。在至少有 10 条有价格房源的区域中，Holmwood（`322600`）的短租挂牌价减去长期租赁周租金除以七所得差值中位数最大，为 **每晚 NZ$242.71**。
+
+Airbnb asking prices and bond rents measure different markets. Bond `active_bonds` is a rounded stock measure, not an exact count of comparable properties; absent or suppressed bond records are not zeros. The generalised SA2 polygons can misclassify points near boundaries. / Airbnb 挂牌价与长期租金并非完全可比；`active_bonds` 是经过保密取整的存量指标，不是可直接对应的准确房屋数量；缺失或被抑制的押金记录不是零。简化版 SA2 边界可能影响边界附近的房源。
+
+### Re-run / 重新运行
+
+From the project folder, with pandas installed, run `python deliverable5_analysis.py`. It reads the two prepared compressed datasets in `processed_data/` and regenerates the joined dataset and summaries. Re-running `deliverable5_geocode.py` requires a Koordinates API key in the **session-only** `KOORDINATES_API_KEY` environment variable; the saved geocoded dataset means those queries are not required just to reproduce the analysis. Never put the key in source code, README, screenshots or Git. / 在项目目录安装 pandas 后运行 `python deliverable5_analysis.py`，即可由两份已处理压缩数据重建连接数据和分析结果。只有重新进行地理查询时才需要在当前终端设置 `KOORDINATES_API_KEY`；不要将密钥放进代码、README、截图或 Git。
+
+Sources / 来源：[Tenancy Services rental bond data](https://www.tenancy.govt.nz/about-tenancy-services/data-and-statistics/rental-bond-data/), [Stats NZ SA2-2019 layer](https://datafinder.stats.govt.nz/layer/98970-statistical-area-2-2019-generalised/), [Stats NZ SA2 names](https://statsnz.contentdm.oclc.org/digital/api/collection/p20045coll24/id/980/download).
