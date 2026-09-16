@@ -158,6 +158,96 @@ Python analysis code / Python 分析代码：deliverable3.py
 
 Local combined dataset / 本地合并数据：christchurch_2025_10_to_2026_06.csv
 
+
+
+
+-----------------------------week7-------------------------------------------------------------
+# DATA201/422 Group Project — Deliverable 4
+
+This folder contains a reproducible cleaning pipeline for the Christchurch Airbnb listing data from Deliverable 3 and the Tenancy Services detailed quarterly rental-bond data.
+
+## Outputs
+
+- `processed_data/christchurch_listings_clean.csv.gz`
+- `processed_data/rental_bond_clean.csv.gz`
+- `processed_data/CLEANING_REPORT.md`
+- `processed_data/cleaning_summary.json`
+
+The two datasets are compressed CSV files. Pandas, R and most data tools can read `.csv.gz` directly. Compression keeps the repository small without changing the table contents.
+
+## Reproduce the cleaning
+
+Install Python 3.10 or later and the dependency in `requirements.txt`. Download the latest **Detailed quarterly report, January 2020 to 2026** from Tenancy Services. Then run:
+
+```text
+python deliverable4.py \
+  --listing-input local_data/christchurch_2025_10_to_2026_06.csv \
+  --bond-input local_data/Detailed-Quarterly-Tenancy.csv \
+  --output-dir processed_data
+```
+
+All paths are command-line arguments, so team members do not need to edit the script. The pipeline validates required columns and stops with a clear error if the wrong file is supplied.
+
+## Sources
+
+### Christchurch listing data
+
+- Source: Inside Airbnb, New Zealand monthly listing extracts
+- Website: https://insideairbnb.com/get-the-data/
+- Supplied period: October 2025 to June 2026
+- Deliverable 3 input: `christchurch_2025_10_to_2026_06.csv`
+
+### Rental bond data
+
+- Source: Ministry of Business, Innovation and Employment, Tenancy Services
+- Dataset: Detailed quarterly rental bond report, January 2020 to 2026
+- Website: https://www.tenancy.govt.nz/about-tenancy-services/data-and-statistics/rental-bond-data/
+- Geography: SA2-2019 definitions from Stats NZ
+- Scope: private-sector bonds, recorded by tenancy start date
+- Licence: Creative Commons Attribution 3.0 New Zealand
+- Accessed: 16 September 2026
+
+Tenancy Services applies fixed random rounding to base 3 and suppresses results where fewer than five bonds are present for a selection. It also warns that recent data is provisional during migration to a new bond-management system.
+
+## Clean listing columns
+
+| Column | Meaning |
+|---|---|
+| `id` | Inside Airbnb listing identifier |
+| `month_year` | Monthly snapshot represented by the row |
+| `scrape_date` | Date the monthly listing file was collected |
+| `neighbourhood` | Smaller area supplied by Inside Airbnb |
+| `latitude`, `longitude` | Listing coordinates retained for later geographic matching |
+| `room_type` | Entire home/apartment, private room, hotel room or shared room |
+| `price_nzd_per_night` | Advertised nightly price in NZD; missing values are not imputed |
+| `has_price` | Whether a valid positive price is present |
+| `minimum_nights` | Minimum stay required by the listing |
+| `availability_365` | Days marked available in the next 365 days |
+| `is_available` | Whether `availability_365` is greater than zero |
+
+## Clean bond columns
+
+| Column | Meaning |
+|---|---|
+| `timeframe` | Quarter-start date published in the source |
+| `location_id` | Source SA2-2019 location identifier; retained unchanged where present |
+| `location_id_status` | Marks valid, missing or source-special identifiers |
+| `dwelling_type` | Published dwelling category |
+| `number_of_beds` | Published bedroom category; blank values become `Unknown` |
+| `total_bonds` | Published total-bond count for the row's dimensions |
+| `active_bonds` | Published active-bond count |
+| `closed_bonds` | Published closed-bond count |
+| `median_rent_nzd_per_week` | Published median weekly rent |
+| `geometric_mean_rent_nzd_per_week` | Geometric mean weekly rent, recommended by the source as a median alternative |
+| `upper_quartile_rent_nzd_per_week` | Published synthetic upper-quartile weekly rent |
+| `lower_quartile_rent_nzd_per_week` | Published synthetic lower-quartile weekly rent |
+| `log_std_dev_weekly_rent` | Published log standard deviation of weekly rent |
+
+See `processed_data/CLEANING_REPORT.md` for exact row counts, missingness consequences and all cleaning decisions.
+
+## Important comparison warning
+
+Airbnb prices represent advertised nightly short-stay prices. Rental-bond rent represents long-term weekly rent. The two measures should not be compared as if they describe the same product. A later analysis should convert units, choose comparable property groups and state this market difference explicitly.
 The large CSV datasets are stored locally and are not uploaded to GitHub.
 
 大型 CSV 数据保存在每位组员的本地电脑中，不上传到 GitHub。
