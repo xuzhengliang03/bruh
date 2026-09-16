@@ -1,0 +1,194 @@
+{
+  "listings": {
+    "source_file": "christchurch_2025_10_to_2026_06.csv",
+    "source_sha256": "8bcba64e157405fd8c4b80c5797fafe79e09fb4ec9eaa86a3bb337bb936d8da7",
+    "rows_before": 28795,
+    "columns_before": 21,
+    "missing_before": {
+      "id": 0,
+      "name": 0,
+      "host_id": 0,
+      "host_name": 1,
+      "neighbourhood_group": 0,
+      "neighbourhood": 0,
+      "latitude": 0,
+      "longitude": 0,
+      "room_type": 0,
+      "price": 10667,
+      "minimum_nights": 37,
+      "number_of_reviews": 0,
+      "last_review": 2627,
+      "reviews_per_month": 2627,
+      "calculated_host_listings_count": 0,
+      "availability_365": 0,
+      "number_of_reviews_ltm": 0,
+      "license": 28795,
+      "month_year": 0,
+      "scrape_date": 0,
+      "days_since_last_review": 2627
+    },
+    "rows_removed_outside_christchurch": 0,
+    "rows_removed_invalid_period": 0,
+    "rows_removed_missing_or_invalid_coordinates": 0,
+    "nonpositive_prices_set_missing": 0,
+    "invalid_minimum_nights_set_missing": 0,
+    "invalid_availability_set_missing": 0,
+    "duplicate_listing_month_rows_removed": 0,
+    "rows_after": 28795,
+    "columns_after": 12,
+    "date_min": "2025-10",
+    "date_max": "2026-06",
+    "missing_after": {
+      "id": 0,
+      "month_year": 0,
+      "scrape_date": 0,
+      "neighbourhood": 0,
+      "latitude": 0,
+      "longitude": 0,
+      "room_type": 0,
+      "price_nzd_per_night": 10667,
+      "has_price": 0,
+      "minimum_nights": 37,
+      "availability_365": 0,
+      "is_available": 0
+    },
+    "monthly_summary": [
+      {
+        "month_year": "2025-10",
+        "rows": 2991,
+        "unique_listings": 2991,
+        "valid_prices": 2821,
+        "available_listings": 2863,
+        "median_price_nzd_per_night": 155.0,
+        "maximum_price_nzd_per_night": 43188.0
+      },
+      {
+        "month_year": "2025-11",
+        "rows": 3047,
+        "unique_listings": 3047,
+        "valid_prices": 2835,
+        "available_listings": 2905,
+        "median_price_nzd_per_night": 166.0,
+        "maximum_price_nzd_per_night": 43654.0
+      },
+      {
+        "month_year": "2025-12",
+        "rows": 3180,
+        "unique_listings": 3180,
+        "valid_prices": 0,
+        "available_listings": 3049,
+        "median_price_nzd_per_night": null,
+        "maximum_price_nzd_per_night": null
+      },
+      {
+        "month_year": "2026-01",
+        "rows": 3057,
+        "unique_listings": 3057,
+        "valid_prices": 0,
+        "available_listings": 3012,
+        "median_price_nzd_per_night": null,
+        "maximum_price_nzd_per_night": null
+      },
+      {
+        "month_year": "2026-02",
+        "rows": 3190,
+        "unique_listings": 3190,
+        "valid_prices": 0,
+        "available_listings": 3115,
+        "median_price_nzd_per_night": null,
+        "maximum_price_nzd_per_night": null
+      },
+      {
+        "month_year": "2026-03",
+        "rows": 3227,
+        "unique_listings": 3227,
+        "valid_prices": 3059,
+        "available_listings": 3130,
+        "median_price_nzd_per_night": 237.0,
+        "maximum_price_nzd_per_night": 6277.0
+      },
+      {
+        "month_year": "2026-04",
+        "rows": 3273,
+        "unique_listings": 3273,
+        "valid_prices": 3069,
+        "available_listings": 3144,
+        "median_price_nzd_per_night": 229.0,
+        "maximum_price_nzd_per_night": 6277.0
+      },
+      {
+        "month_year": "2026-05",
+        "rows": 3361,
+        "unique_listings": 3361,
+        "valid_prices": 3149,
+        "available_listings": 3207,
+        "median_price_nzd_per_night": 215.0,
+        "maximum_price_nzd_per_night": 22971.0
+      },
+      {
+        "month_year": "2026-06",
+        "rows": 3469,
+        "unique_listings": 3469,
+        "valid_prices": 3195,
+        "available_listings": 3262,
+        "median_price_nzd_per_night": 214.0,
+        "maximum_price_nzd_per_night": 6277.0
+      }
+    ],
+    "price_outliers_above_1000_retained": 153
+  },
+  "rental_bonds": {
+    "source_file": "Detailed-Quarterly-Tenancy.csv",
+    "source_sha256": "b40a39a0ce899362df5da729ed38cf8962cc31058910693aa2301feb9d0be80e",
+    "rows_before": 226080,
+    "columns_before": 12,
+    "missing_before": {
+      "TimeFrame": 0,
+      "Location Id": 794,
+      "Dwelling Type": 0,
+      "Number Of Beds": 12009,
+      "Total Bonds": 0,
+      "Active Bonds": 0,
+      "Closed Bonds": 0,
+      "Median Rent": 803,
+      "Geometric Mean Rent": 803,
+      "Upper Quartile Rent": 803,
+      "Lower Quartile Rent": 803,
+      "Log Std Dev Weekly Rent": 859
+    },
+    "rows_removed_invalid_timeframe": 0,
+    "rows_removed_outside_matching_quarters": 198868,
+    "rows_with_negative_counts_set_missing": 0,
+    "rows_with_nonpositive_rent_set_missing": 0,
+    "duplicate_key_rows_removed": 0,
+    "rows_after": 27212,
+    "columns_after": 13,
+    "date_min": "2025-10-01",
+    "date_max": "2026-04-01",
+    "quarters_retained": [
+      "2025-10-01",
+      "2026-01-01",
+      "2026-04-01"
+    ],
+    "missing_after": {
+      "timeframe": 0,
+      "location_id": 94,
+      "location_id_status": 0,
+      "dwelling_type": 0,
+      "number_of_beds": 0,
+      "total_bonds": 0,
+      "active_bonds": 0,
+      "closed_bonds": 0,
+      "median_rent_nzd_per_week": 94,
+      "geometric_mean_rent_nzd_per_week": 94,
+      "upper_quartile_rent_nzd_per_week": 94,
+      "lower_quartile_rent_nzd_per_week": 94,
+      "log_std_dev_weekly_rent": 94
+    },
+    "location_id_status_counts": {
+      "valid": 26991,
+      "source_special_code": 127,
+      "missing": 94
+    }
+  }
+}
