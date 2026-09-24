@@ -406,7 +406,6 @@ The rental bond data is published by the Ministry of Business, Innovation and Em
 ------------------------week8------------------------------------------------
 ## Deliverable 5: SA2 matching and rental comparison / 区域匹配与租金比较
 
-This ZIP includes the compressed prepared data, reproducible code and results. The original large downloads and the Koordinates API key are not included. / 本压缩包包含压缩后的已处理数据、可重复运行的代码和结果；不包含原始大型下载文件或 Koordinates API 密钥。
 
 ### Files / 文件
 
