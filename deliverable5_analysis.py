@@ -14,15 +14,20 @@ import pandas as pd
 
 # 仅给报告中重点提及的 SA2 编号补上地名；其余区域仍可用编号分析。
 #Add place names only for the SA2 codes highlighted in the report; the remaining areas can still be analyzed using the codes.
+# Important analysis settings are stored as named constants.
+# 重要分析设置使用命名常量，避免代码中出现难以理解的魔法数字。
+CHRISTCHURCH_CENTRAL_ID = 326600
+MIN_PRICED_LISTINGS_FOR_RANKING = 10
+DISPLAY_AREA_ROWS = 10
+
+
+# 仅给报告中重点提及的 SA2 编号补上地名；其余区域仍可用编号分析。
 AREA_NAMES = {
     322600: "Holmwood",
     322500: "Wigram North",
     332700: "Sumner",
-    326600: "Christchurch Central",
+    CHRISTCHURCH_CENTRAL_ID: "Christchurch Central",
 }
-# 排名时要求至少 10 条有价格的 Airbnb 房源，避免极小样本左右结论。
-# A minimum of 10 Airbnb listings with pricing data is required for ranking to prevent conclusions from being skewed by extremely small sample sizes.
-MIN_PRICED_LISTINGS_FOR_RANKING = 10
 
 
 def require_columns(frame: pd.DataFrame, names: set[str], label: str) -> None:
@@ -130,7 +135,9 @@ def main() -> None:
     latest_month = listings["month_year"].max()
     latest = joined.loc[joined["month_year"].eq(latest_month)].copy()
     latest_quarter = latest["quarter_start"].iloc[0]
-    central = latest.loc[latest["location_id"].eq(326600)]
+    central = latest.loc[
+        latest["location_id"].eq(CHRISTCHURCH_CENTRAL_ID)
+    ]
     central_median = central["price_nzd_per_night"].median()
 
     # 第七块：按 SA2 区域汇总 Airbnb 数量、价格、押金数量和价格差中位数。
@@ -155,6 +162,22 @@ def main() -> None:
     ]].sort_values("location_id")
     # 只在满足最小样本量且能算出价格差的区域中，寻找最大中位价差。
     #Identify the maximum median price difference only within areas that meet the minimum sample size requirement and allow for the calculation of a price difference.
+    # Sanity check: each SA2 should appear only once.
+    # 合理性检查：每个 SA2 地区在汇总表中只能出现一次。
+    if areas["location_id"].duplicated().any():
+        duplicate_ids = (
+            areas.loc[
+                areas["location_id"].duplicated(keep=False),
+                "location_id",
+            ]
+            .dropna()
+            .unique()
+            .tolist()
+        )
+        raise AssertionError(
+            f"Area comparison contains duplicate location IDs: "
+            f"{duplicate_ids}"
+        )
     eligible = areas.loc[
         areas["priced_airbnb_count"].ge(MIN_PRICED_LISTINGS_FOR_RANKING)
         & areas["median_gap_nzd_per_night"].notna()
@@ -179,7 +202,7 @@ def main() -> None:
         f"- Joined listing-month rows: {len(joined):,}; unchanged from Airbnb input.",
         f"- Listing-month rows with a matching ALL/ALL bond record: {int(joined['bond_join_status'].eq('both').sum()):,}.",
         f"- Listing-month rows without a matching bond record: {int(joined['bond_join_status'].eq('left_only').sum()):,}.",
-        f"- Christchurch Central (SA2 326600) June 2026 median Airbnb price: NZ${central_median:,.2f} per night, based on {central['price_nzd_per_night'].count():,} priced listings.",
+        f"- Christchurch Central (SA2 {CHRISTCHURCH_CENTRAL_ID}) June 2026 median Airbnb price: NZ${central_median:,.2f} per night, based on {central['price_nzd_per_night'].count():,} priced listings.",
         "",
         "## Largest median short- versus long-term nightly gap",
         "",
@@ -215,6 +238,39 @@ def main() -> None:
         "",
     ]
     report_path.write_text("\n".join(report), encoding="utf-8")
+    # Display a concise Airbnb and rental bond comparison.
+    # 在终端显示简洁的 Airbnb 与长期租赁数量比较。
+    count_comparison = (
+        areas[
+            [
+                "location_id",
+                "area_name",
+                "airbnb_listing_count",
+                "active_bonds",
+            ]
+        ]
+        .sort_values(
+            "airbnb_listing_count",
+            ascending=False,
+        )
+        .head(DISPLAY_AREA_ROWS)
+    )
+
+    areas_with_bond = int(areas["active_bonds"].notna().sum())
+    areas_with_more_than_5_prices = int(
+        areas["priced_airbnb_count"].gt(5).sum()
+    )
+
+    print("\nAirbnb and rental bond comparison by SA2:")
+    print(count_comparison.to_string(index=False))
+
+    print("\nComparison summary:")
+    print(f"Total SA2 areas: {len(areas):,}")
+    print(f"Areas with matching bond data: {areas_with_bond:,}")
+    print(
+        "Areas with more than 5 priced Airbnb listings: "
+        f"{areas_with_more_than_5_prices:,}"
+    )
     # 终端只打印关键结果和输出路径，方便现场检查程序是否成功完成。
     # The terminal prints only key results and output paths, making it easy to verify on-site whether the program completed successfully.
     print(f"Latest month: {latest_month}; bond quarter: {latest_quarter}")

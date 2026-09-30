@@ -430,3 +430,21 @@ Airbnb asking prices and bond rents measure different markets. Bond `active_bond
 From the project folder, with pandas installed, run `python deliverable5_analysis.py`. It reads the two prepared compressed datasets in `processed_data/` and regenerates the joined dataset and summaries. Re-running `deliverable5_geocode.py` requires a Koordinates API key in the **session-only** `KOORDINATES_API_KEY` environment variable; the saved geocoded dataset means those queries are not required just to reproduce the analysis. Never put the key in source code, README, screenshots or Git. / 在项目目录安装 pandas 后运行 `python deliverable5_analysis.py`，即可由两份已处理压缩数据重建连接数据和分析结果。只有重新进行地理查询时才需要在当前终端设置 `KOORDINATES_API_KEY`；不要将密钥放进代码、README、截图或 Git。
 
 Sources / 来源：[Tenancy Services rental bond data](https://www.tenancy.govt.nz/about-tenancy-services/data-and-statistics/rental-bond-data/), [Stats NZ SA2-2019 layer](https://datafinder.stats.govt.nz/layer/98970-statistical-area-2-2019-generalised/), [Stats NZ SA2 names](https://statsnz.contentdm.oclc.org/digital/api/collection/p20045coll24/id/980/download).
+
+## Deliverable 6: Code review and design principles
+
+For Deliverable 6, we reviewed the cleaning, geocoding and analysis
+pipeline using the coding practices discussed in Week 9.
+
+Documents:
+
+- [Week 9 code review notes](WEEK9_CODE_REVIEW.md)
+- [Pipeline design principles](DESIGN_PRINCIPLES.md)
+
+The primary sanity check can be run with:
+
+`python .\deliverable5_geocode.py --test-only`
+
+The analysis can be reproduced with:
+
+`python .\deliverable5_analysis.py`
