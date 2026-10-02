@@ -1,6 +1,6 @@
 """按 SA2-2019 区号和季度连接 Airbnb 房源与长期租赁押金汇总。
 
-在项目根目录运行：python deliverable5_analysis.py
+在项目根目录运行：python deliverable6.py
 需要 pandas；结果默认保存到 processed_data 文件夹。
 """
 
