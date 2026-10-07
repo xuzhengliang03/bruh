@@ -154,7 +154,7 @@ For June 2026, the top 10% review threshold was 184 reviews.在 2026 年 6 月�
 
 Files / 文件说明
 
-Python analysis code / Python 分析代码：deliverable3.py
+Python preparation code / Python 数据准备代码：`prepare_airbnb_monthly_data.py`
 
 Local combined dataset / 本地合并数据：christchurch_2025_10_to_2026_06.csv
 
@@ -320,7 +320,7 @@ For June 2026, the top 10% review threshold was 184 reviews.在 2026 年 6 月�
 
 Files / 文件说明
 
-Python analysis code / Python 分析代码：deliverable3.py
+Python preparation code / Python 数据准备代码：`prepare_airbnb_monthly_data.py`
 
 Local combined dataset / 本地合并数据：christchurch_2025_10_to_2026_06.csv
 
@@ -338,7 +338,7 @@ Deliverable 4 对 Deliverable 3 生成的 Christchurch Airbnb 房源数据和 Te
 
 ### Files / 文件
 
-- Cleaning code / 清洗代码：`deliverable4.py`
+- Cleaning code / 清洗代码：`clean_airbnb_and_bond_data.py`
 - Python dependencies / Python 依赖：`requirements.txt`
 - Clean datasets / 清洗后的数据：saved locally in `processed_data/` and not uploaded to GitHub / 保存在本地 `processed_data/` 文件夹，不上传至 GitHub
 
@@ -388,12 +388,14 @@ Install the dependency in `requirements.txt`, download the Tenancy Services deta
 
 安装 `requirements.txt` 中的依赖，下载 Tenancy Services 的季度详细数据，然后运行：
 
-```bash
-python deliverable4.py \
-  --listing-input local_data/christchurch_2025_10_to_2026_06.csv \
-  --bond-input local_data/Detailed-Quarterly-Tenancy.csv \
-  --output-dir processed_data
+```powershell
+python .\clean_airbnb_and_bond_data.py --listing-input .\local_data\christchurch_2025_10_to_2026_06.csv --bond-input .\local_data\Detailed-Quarterly-Tenancy.csv --output-dir .\processed_data
 ```
+
+The command must be run from the project root. Its two input paths are
+`local_data/christchurch_2025_10_to_2026_06.csv` and
+`local_data/Detailed-Quarterly-Tenancy.csv`; its output directory is
+`processed_data/`. / 此命令须从项目根目录运行。两个输入文件和输出目录均已在命令中明确写出。
 
 ### Data Sources / 数据来源
 
@@ -409,11 +411,12 @@ The rental bond data is published by the Ministry of Business, Innovation and Em
 
 ### Files / 文件
 
-- `deliverable5_geocode.py`: queries Stats NZ SA2-2019 for each unique Airbnb coordinate, caches responses locally and saves `processed_data/christchurch_listings_with_sa2.csv.gz`. / 查询每个不同坐标的 SA2-2019 区号，并保存新增区域编号的房源数据。
-- `deliverable5_analysis.py`: joins Airbnb listing-month rows to quarterly bond summaries and writes the joined file, area comparison and analysis report. / 按区域及季度连接两份数据，输出连接表、各区域比较及分析报告。
+- `geocode_airbnb_sa2.py`: queries Stats NZ SA2-2019 for each unique Airbnb coordinate, caches responses locally and saves `processed_data/christchurch_listings_with_sa2.csv.gz`. / 查询每个不同坐标的 SA2-2019 区号，并保存新增区域编号的房源数据。
+- `analyse_airbnb_bonds.py`: joins Airbnb listing-month rows to quarterly bond summaries and writes the joined file, area comparison and analysis report. / 按区域及季度连接两份数据，输出连接表、各区域比较及分析报告。
 - `processed_data/airbnb_bond_joined.csv.gz`: listing-level left-join output, retaining all 28,795 Airbnb listing-month rows. / 保留全部 28,795 条房源月份记录的左连接结果。
 - `processed_data/area_comparison_latest_month.csv`: June 2026 Airbnb counts, prices and active bond counts by SA2. / 按 SA2 汇总的 2026 年 6 月房源数量、价格及活跃押金数量。
-- `processed_data/deliverable5_results.md`: detailed methods, findings and limitations. / 方法、结果及限制说明。
+- `processed_data/airbnb_bond_analysis_report.md`: detailed methods, findings and limitations. / 方法、结果及限制说明。
+- `docs/airbnb_bond_analysis_report.md`: version-controlled copy of the analysis report for review on GitHub. / 供 GitHub 查看和评分的报告副本。
 
 ### Method and findings / 方法与结果
 
@@ -427,7 +430,7 @@ Airbnb asking prices and bond rents measure different markets. Bond `active_bond
 
 ### Re-run / 重新运行
 
-From the project folder, with pandas installed, run `python deliverable5_analysis.py`. It reads the two prepared compressed datasets in `processed_data/` and regenerates the joined dataset and summaries. Re-running `deliverable5_geocode.py` requires a Koordinates API key in the **session-only** `KOORDINATES_API_KEY` environment variable; the saved geocoded dataset means those queries are not required just to reproduce the analysis. Never put the key in source code, README, screenshots or Git. / 在项目目录安装 pandas 后运行 `python deliverable5_analysis.py`，即可由两份已处理压缩数据重建连接数据和分析结果。只有重新进行地理查询时才需要在当前终端设置 `KOORDINATES_API_KEY`；不要将密钥放进代码、README、截图或 Git。
+From the project folder, with pandas installed, run `python .\analyse_airbnb_bonds.py`. It reads the two prepared compressed datasets in `processed_data/` and regenerates the joined dataset and summaries. Re-running `geocode_airbnb_sa2.py` requires a Koordinates API key in the **session-only** `KOORDINATES_API_KEY` environment variable; the saved geocoded dataset means those queries are not required just to reproduce the analysis. Never put the key in source code, README, screenshots or Git. / 在项目目录安装 pandas 后运行 `python .\analyse_airbnb_bonds.py`，即可由两份已处理压缩数据重建连接数据和分析结果。只有重新进行地理查询时才需要在当前终端设置 `KOORDINATES_API_KEY`；不要将密钥放进代码、README、截图或 Git。
 
 Sources / 来源：[Tenancy Services rental bond data](https://www.tenancy.govt.nz/about-tenancy-services/data-and-statistics/rental-bond-data/), [Stats NZ SA2-2019 layer](https://datafinder.stats.govt.nz/layer/98970-statistical-area-2-2019-generalised/), [Stats NZ SA2 names](https://statsnz.contentdm.oclc.org/digital/api/collection/p20045coll24/id/980/download).
 
@@ -438,13 +441,40 @@ pipeline using the coding practices discussed in Week 9.
 
 Documents:
 
-- [Week 9 code review notes](WEEK9_CODE_REVIEW.md)
-- [Pipeline design principles](DESIGN_PRINCIPLES.md)
+- [Week 9 code review notes](docs/WEEK9_CODE_REVIEW.md)
+- [Pipeline design principles](docs/DESIGN_PRINCIPLES.md)
 
 The primary sanity check can be run with:
 
-`python .\deliverable5_geocode.py --test-only`
+`python .\geocode_airbnb_sa2.py --test-only`
 
 The analysis can be reproduced with:
 
-`python .\deliverable5_analysis.py`
+`python .\analyse_airbnb_bonds.py`
+
+### Koordinates API key: where it is used / API 密钥在哪里使用
+
+Only `geocode_airbnb_sa2.py` reads `KOORDINATES_API_KEY`. The key authenticates
+requests to Koordinates layer `98970`; the cleaning and analysis scripts do not
+use it. The key is held only in the current terminal session and is never written
+to a project file. / 只有 `geocode_airbnb_sa2.py` 读取此密钥，用于访问 Koordinates
+图层 `98970`。清洗和分析代码不使用密钥，密钥仅保存在当前终端会话中。
+
+```powershell
+$secret = Read-Host 'Paste Koordinates API key' -AsSecureString
+$env:KOORDINATES_API_KEY = [System.Net.NetworkCredential]::new('', $secret).Password
+python .\geocode_airbnb_sa2.py --test-only
+```
+
+### Descriptive script names / 直观的代码文件名
+
+| Pipeline stage | Script |
+|---|---|
+| Prepare monthly Airbnb data | `prepare_airbnb_monthly_data.py` |
+| Clean Airbnb and rental-bond data | `clean_airbnb_and_bond_data.py` |
+| Match Airbnb coordinates to SA2 | `geocode_airbnb_sa2.py` |
+| Analyse Airbnb and rental bonds | `analyse_airbnb_bonds.py` |
+
+Long explanations and design decisions are kept in `docs/`; code comments are
+reserved for short explanations of non-obvious logic. / 较长的解释和设计决定放在
+`docs/`，代码内只保留解释必要逻辑的简短注释。

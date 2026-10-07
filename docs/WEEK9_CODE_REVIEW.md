@@ -1,133 +1,103 @@
-# Week 9 Code Review Notes
+# Week 9 code review notes
 
 ## Review scope
-1.检查了代码可读性、验证、安全性、可复现性和程序输出
-We reviewed the existing data-cleaning, geocoding and analysis
-pipeline using the coding practices discussed in Week 9.
 
-The review focused on code readability, validation, security,
-reproducibility and clear program output.
-
+We reviewed the data preparation, cleaning, geocoding and rental-comparison
+pipeline for readability, validation, security, reproducibility and clear
+program output.
 
 ## Changes made
-### 1. Replaced magic numbers with named constants
-We added named constants for:
 
-- the Christchurch Central SA2 location ID;
-- the minimum number of priced listings required for ranking;
-- the number of area rows displayed in the terminal.
+### Descriptive script names
 
-Reason: important analysis settings should have descriptive names and
-should be defined in one place. This makes the code easier to
-understand and reduces the risk of inconsistent changes.
+The numbered script names were replaced with names that describe their work:
 
-Coding practice: use descriptive names and avoid magic numbers.
-对应
-CHRISTCHURCH_CENTRAL_ID = 326600
-MIN_PRICED_LISTINGS_FOR_RANKING = 10
-DISPLAY_AREA_ROWS = 10
+- `prepare_airbnb_monthly_data.py`
+- `clean_airbnb_and_bond_data.py`
+- `geocode_airbnb_sa2.py`
+- `analyse_airbnb_bonds.py`
 
-### 2. Added an SA2 uniqueness sanity check
-The analysis now checks that each SA2 location ID appears only once in
-the final area-comparison table. If duplicate location IDs are found,
-the pipeline stops and reports them.
-Reason: duplicate area rows could create misleading Airbnb and active
-bond counts. It is safer to stop the pipeline than to save an
-apparently valid but incorrect result.
-Coding practice: fail fast and validate assumptions explicitly.
-对应
-if areas["location_id"].duplicated().any():
-    raise AssertionError(...)
+Reason: a team member can understand the purpose of each file without knowing
+which weekly deliverable originally introduced it.
 
-### 3. Added concise regional comparison output
-The analysis now displays the ten SA2 areas with the largest Airbnb
-listing counts. It also displays:
-- the total number of SA2 areas;
-- the number of areas with matching bond data;
-- the number of areas with more than five priced Airbnb listings.
-Reason: users can quickly inspect the main output without printing all
-167 rows or manually opening the complete CSV file.
-Coding practice: provide concise and useful program output.
+### Explanatory comments moved to documentation
 
-这些功能原来已经存在，不是这次新增的
+Long bilingual block-by-block comments were removed from the geocoding and
+analysis scripts. The code retains short docstrings and comments only where
+they explain a non-obvious implementation choice. Pipeline reasoning now lives
+in `docs/DESIGN_PRINCIPLES.md` and the README.
+
+Reason: source code should remain readable, while high-level design decisions
+should be maintained in one documentation location.
+
+### API-key use documented
+
+The README now identifies the exact script and environment variable that use
+the Koordinates key. The key is read only by `geocode_airbnb_sa2.py` from
+`KOORDINATES_API_KEY`; it is never stored in source code, output data, logs or
+the cache.
+
+Reason: credentials should not be committed to source control or exposed in
+screenshots.
+
+### Deliverable 4 paths documented
+
+The README now lists the cleaning script, both input paths, the output directory
+and the complete command that can be run from the project root.
+
+Reason: every team member should be able to reproduce the cleaning outputs
+without editing Python source code.
+
+### Named constants retained
+
+The analysis uses named constants for the Christchurch Central SA2 code, the
+minimum priced-listing sample and the number of area rows printed.
+
+Reason: descriptive names make important analysis choices easy to find and
+avoid unexplained magic numbers.
+
+### Area-summary sanity check retained
+
+The analysis stops if an SA2 location appears more than once in the final area
+table.
+
+Reason: duplicate area rows could produce misleading Airbnb and active-bond
+counts.
+
 ## Existing practices reviewed and retained
 
-### Input validation
-
-The scripts check that required columns exist before processing. They
-also validate dates, listing-month uniqueness and the presence of SA2
-codes.
-
-### API-key security
-
-The Koordinates API key is read from the
-`KOORDINATES_API_KEY` environment variable. It is not stored in the
-source code or committed to GitHub.
-
-### API testing and caching
-
-The geocoding script tests one known coordinate before batch
-processing. Successful coordinate queries are cached, and temporary
-API failures are retried.
-
-### Join validation
-
-The analysis uses a many-to-one left join and checks that the number
-of Airbnb listing-month rows does not change after the join.
-
-### Missing-data treatment
-
-Missing Airbnb prices are preserved rather than invented. Missing bond
-matches are not interpreted as zero rental properties.
-
-## Verification
-记录验证方法
-We first checked the Python syntax using:
-
-`python -m py_compile .\deliverable5_analysis.py`
-
-We then ran the complete analysis using:
-
-`python .\deliverable5_analysis.py`
-
-The script completed successfully and reported:
-
-- 28,795 joined listing-month rows;
-- 167 SA2 areas in the June 2026 comparison;
-- 133 areas with matching bond data;
-- 116 areas with more than five priced Airbnb listings.
-
-The number of joined rows remained equal to the number of Airbnb input
-rows, and the SA2 uniqueness check did not find duplicate area IDs.
-
-## Interpretation limitations
-添加局限说明
-Airbnb listing counts and active bond counts are displayed together,
-but they are not identical measures.
-Airbnb counts are observed online listings. Active bonds are
-confidentiality-rounded stock values from the rental bond dataset.
-A missing bond value does not mean that an area has zero rental
-properties.
-Airbnb prices are asking prices rather than confirmed booking prices.
-These limitations remain documented in the analysis report。
+- Required columns, dates, listing-month keys and SA2 codes are validated.
+- The Koordinates key is read from an environment variable.
+- A known coordinate is tested before any batch API requests.
+- Successful coordinate queries are cached and temporary failures are retried.
+- The rental comparison uses a validated many-to-one left join.
+- The joined row count must equal the Airbnb input row count.
+- Missing Airbnb prices and missing bond matches are not converted to zero.
 
 ## Sanity-check example
 
-Before running the batch Koordinates queries, we tested one known
-coordinate:
+Before batch geocoding, we run:
 
-- Longitude: `172.59658`
-- Latitude: `-43.51148`
-- Expected SA2-2019 code: `320800`
-- Actual SA2-2019 code: `320800`
+```powershell
+python .\geocode_airbnb_sa2.py --test-only
+```
 
-The check was run using:
+The known coordinate (`172.59658`, `-43.51148`) must return SA2-2019 code
+`320800`. The test checks the API key, layer ID, coordinate order and response
+field. Batch processing stops if the actual code differs from the expected
+code.
 
-`python .\deliverable5_geocode.py --test-only`
+The observed result was:
 
-The single-point test passed, and no batch requests were made.
+```text
+Example point returned SA2 code: 320800
+Single-point test passed; no batch requests were made.
+```
 
-This sanity check verifies the API key, layer ID, coordinate order and
-response field before thousands of API queries are submitted. The
-pipeline stops before batch processing if the returned code does not
-match the expected value.
+## Interpretation limitations
+
+Airbnb listing counts and active-bond counts are displayed together but are not
+identical measures. Airbnb counts are observed online listings, while active
+bonds are confidentiality-rounded stock values. A missing bond match does not
+mean that an area has zero rental properties. Airbnb prices are asking prices,
+not confirmed booking prices.

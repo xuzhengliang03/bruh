@@ -1,75 +1,144 @@
-# Pipeline Design Principles
+# Pipeline design principles
 
-## AI Used
+## AI use
 
-ChatGPT was used to help create this design principles document.  
-The document was checked against the actual Python code to make sure it matches the pipeline.
+OpenAI Codex was used to help review the pipeline structure and draft this
+document. The team checked the document against the Python implementation and
+remains responsible for the final code, methods and documentation.
 
-## 1. Inputs to the Pipeline
+## 1. Inputs
 
-The pipeline uses two main prepared datasets:
+### Raw inputs
 
-- Christchurch Airbnb listing data with SA2 location IDs
-- New Zealand rental bond data
+- Monthly Christchurch Airbnb CSV files stored under `local_data/`.
+- `local_data/Detailed-Quarterly-Tenancy.csv`, downloaded from New Zealand
+  Tenancy Services.
 
-The Airbnb data includes information such as listing ID, month, SA2 location ID and nightly price.
+### Prepared inputs
 
-The rental bond data includes quarter, SA2 location ID, active bond counts and median weekly rent.
+- `processed_data/christchurch_listings_clean.csv.gz`
+- `processed_data/rental_bond_clean.csv.gz`
+- Stats NZ Statistical Area 2 2019 generalised layer `98970` on Koordinates.
+- A Koordinates API key supplied at runtime through the
+  `KOORDINATES_API_KEY` environment variable.
 
-## 2. Outputs from the Pipeline
+The API key is used only by `geocode_airbnb_sa2.py` to call the Koordinates
+spatial-query endpoint. It is not stored in source code, output files, reports
+or the coordinate cache.
 
-The main outputs are:
+## 2. Outputs
 
-- `airbnb_bond_joined.csv.gz`
-- `area_comparison_latest_month.csv`
-- `deliverable5_results.md`
+### Data preparation and cleaning
 
-These outputs provide the joined Airbnb and rental bond data, an SA2-level comparison table, and a short written summary of the analysis.
+- Combined monthly Airbnb data under `local_data/`.
+- `processed_data/christchurch_listings_clean.csv.gz`
+- `processed_data/rental_bond_clean.csv.gz`
+- `processed_data/CLEANING_REPORT.md`
+- `processed_data/cleaning_summary.json`
 
-## 3. Main Steps in the Pipeline
+### Geocoding
 
-The main steps are:
+- `processed_data/christchurch_listings_with_sa2.csv.gz`
+- `processed_data/geocoding_report.json`
+- `processed_data/koordinates_sa2_2019_cache.jsonl` as a local intermediate
+  cache, not a final analytical output.
 
-1. Read the cleaned Airbnb and rental bond datasets.
-2. Check that required columns and valid data are present.
-3. Convert the Airbnb month and bond date into matching quarters.
-4. Keep the overall rental bond summary rows.
-5. Join the Airbnb and rental bond data using SA2 location ID and quarter.
-6. Calculate Airbnb and rental price comparisons.
-7. Group the latest Airbnb month by SA2 area.
-8. Run sanity checks on the final area table.
-9. Save the results and print a short summary in the terminal.
+### Rental comparison
 
-## 4. Coding and Software Strategies
+- `processed_data/airbnb_bond_joined.csv.gz`
+- `processed_data/area_comparison_latest_month.csv`
+- `processed_data/airbnb_bond_analysis_report.md`
+- `docs/airbnb_bond_analysis_report.md` as the version-controlled report copy.
 
-Several coding practices are used in the project.
+## 3. Main steps
 
-### Descriptive Names and Named Constants
+1. `prepare_airbnb_monthly_data.py` reads the monthly Airbnb files, selects
+   Christchurch City, attaches month and scrape-date fields, and combines the
+   observations.
+2. `clean_airbnb_and_bond_data.py` validates required columns, standardises
+   dates and numeric values, removes invalid or duplicate keys, aligns the
+   study period and saves compressed prepared datasets.
+3. `geocode_airbnb_sa2.py` tests one known coordinate before batch processing.
+4. The geocoder extracts unique coordinate pairs, reuses cached results and
+   queries only coordinates not already cached.
+5. The returned `SA22019_V1_00` value is stored as the Airbnb `location_id`,
+   and the geocoded dataset is saved so later runs need not repeat the API
+   requests.
+6. `analyse_airbnb_bonds.py` maps Airbnb months and bond dates to calendar
+   quarter starts.
+7. The analysis retains the bond `ALL` dwelling-type and `ALL` bedroom summary
+   rows to avoid duplicate matches through subcategories.
+8. The prepared datasets are joined on `location_id` and quarter using a
+   validated many-to-one left join.
+9. The latest month is summarised by SA2, including Airbnb counts, active-bond
+   counts, median prices and the short-term-minus-long-term daily price gap.
+10. The joined data, area comparison, written report and concise terminal
+    summary are produced.
 
-Important values use clear names instead of unexplained numbers.
+## 4. Coding and software strategies
 
-For example:
+### Separation of concerns
 
-```python
-CHRISTCHURCH_CENTRAL_ID = 326600
-```
+Preparation, cleaning, geocoding and analysis use separate, descriptively named
+scripts. Each script has one primary responsibility.
 
-This makes the code easier to understand and maintain.
+### Path-driven reproducibility
 
-### Validation and Fail-Fast Behaviour
+Cleaning, geocoding and analysis accept documented input and output paths.
+Users can reproduce results from the project root without editing source code.
 
-The code checks required columns, duplicate records and join assumptions.
+### Descriptive names and named constants
 
-If an important assumption is not satisfied, the program stops instead of continuing with incorrect results.
+Important settings such as `LAYER_ID`, `CODE_FIELD`,
+`CHRISTCHURCH_CENTRAL_ID` and `MIN_PRICED_LISTINGS_FOR_RANKING` have explicit
+names instead of being repeated as unexplained literals.
 
-### Sanity Checks
+### Fail-fast validation
 
-The final area table is checked to make sure each SA2 location ID appears only once.
+The pipeline checks required columns, dates, coordinate ranges, duplicate keys,
+missing SA2 codes and join assumptions. It stops with a clear error instead of
+saving a misleading result.
 
-This helps detect possible problems in the data processing or aggregation.
+### Secret management
 
-### Clear Output
+The Koordinates API key is read from an environment variable and never written
+to the repository or output. Errors avoid printing the request URL because it
+contains the key.
 
-The program prints a short summary of the main results in the terminal.
+### Caching, retries and controlled concurrency
 
-This allows the user to quickly inspect the results without opening the full CSV files.
+Successful spatial queries are cached by coordinate. Temporary network errors
+are retried, while authentication failures stop immediately. A bounded
+`ThreadPoolExecutor` is used because HTTP queries are I/O-bound.
+
+### Defensive joining
+
+The analysis uses `validate="many_to_one"` and checks that the left join does
+not change the number of Airbnb listing-month rows.
+
+### Explicit missing-data treatment
+
+Missing prices and missing bond matches remain missing rather than being
+silently converted to zero. This prevents unknown values from being treated as
+real prices or property counts.
+
+### Documentation location
+
+Source files retain concise docstrings and comments for non-obvious code. The
+pipeline design, methods, commands and interpretation limitations are kept in
+the README and `docs/` rather than repeated block by block inside the code.
+
+## Sanity checks
+
+The primary sanity check queries longitude `172.59658` and latitude
+`-43.51148`; layer `98970` must return SA2 code `320800` before batch requests
+are allowed. The analysis also checks listing-month uniqueness, bond-summary
+uniqueness, join row-count preservation and SA2 uniqueness in the final area
+table.
+
+## Interpretation limitations
+
+Airbnb listings and active bonds are different measures. Active-bond counts are
+confidentiality-rounded stock values, while Airbnb counts are observed online
+listings. A missing bond match is not zero rental properties. Airbnb prices are
+asking prices, and dividing weekly bond rent by seven is only a unit conversion.
