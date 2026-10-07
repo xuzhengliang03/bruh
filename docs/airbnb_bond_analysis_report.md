@@ -1,20 +1,19 @@
-# Deliverable 5: Airbnb and rental bonds
+# Airbnb and rental-bond analysis
 
-- Latest Airbnb month: 2026-06; matched to bond quarter starting 2026-04-01.
-- Joined listing-month rows: 28,795; unchanged from Airbnb input.
+- Latest Airbnb month: 2026-08; matched to bond quarter starting 2026-07-01.
+- Joined listing-month rows: 35,796; unchanged from Airbnb input.
 - Listing-month rows with a matching ALL/ALL bond record: 24,551.
-- Listing-month rows without a matching bond record: 4,244.
-- Christchurch Central (SA2 326600) June 2026 median Airbnb price: NZ$250.00 per night, based on 117 priced listings.
+- Listing-month rows without a matching bond record: 11,245.
+- Christchurch Central (SA2 326600) August 2026 median Airbnb price: NZ$253.00 per night, based on 117 priced listings.
 
 ## Largest median short- versus long-term nightly gap
 
-Holmwood (SA2 322600) has the largest median gap among areas with at least 10 priced June Airbnb listings: NZ$242.71 per night.
-Its median Airbnb price is NZ$347.00/night and bond median is NZ$730.00/week (NZ$104.29/night); 10 priced Airbnb listings.
+Unavailable: no area has enough priced Airbnb listings and a matching bond rent.
 
 ## Counts and interpretation
 
-- June Airbnb listings: 3,469 across 167 SA2 areas.
-- June listings with a matching bond summary: 2,982; without: 487.
+- August 2026 Airbnb listings: 3,488 across 167 SA2 areas.
+- August 2026 listings with a matching bond summary: 0; without: 3,488.
 - `area_comparison_latest_month.csv` lists Airbnb counts beside active bonds for each area. Active bonds are a stock measure, while Airbnb counts are observed listings; the two are not identical property populations.
 - Bond counts are confidentiality-rounded to base 3, and some bond results are suppressed. Missing bond matches are not zero rental properties.
 - Airbnb nightly listing prices are asking prices, not observed bookings. Weekly bond median divided by 7 is only a unit conversion, not an estimate of equivalent whole-property rent.

@@ -228,7 +228,13 @@ def main() -> int:
             str(args.processed_dir),
         ]
     )
-
+    generated_report = args.processed_dir / "airbnb_bond_analysis_report.md"
+    report_copy = Path("docs") / "airbnb_bond_analysis_report.md"
+    report_copy.parent.mkdir(parents=True, exist_ok=True)
+    report_copy.write_text(
+        generated_report.read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
     refreshed = pd.read_csv(geocoded_path, low_memory=False)
     save_monthly_plots(refreshed, args.processed_dir)
     summary = {
