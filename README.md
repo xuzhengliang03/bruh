@@ -478,3 +478,31 @@ python .\geocode_airbnb_sa2.py --test-only
 Long explanations and design decisions are kept in `docs/`; code comments are
 reserved for short explanations of non-obvious logic. / 较长的解释和设计决定放在
 `docs/`，代码内只保留解释必要逻辑的简短注释。
+
+## Deliverable 7: automated monthly update / 月度自动更新
+
+Download the New Zealand summary `listings.csv` files and save them under
+`local_data/` using `YYYY_MM.csv` names. For the current update the files are
+`2026_07.csv` and `2026_08.csv`. After setting `KOORDINATES_API_KEY`, the whole
+incremental update is one command:
+
+```powershell
+python .\update_airbnb_pipeline.py
+```
+
+The command discovers the new month files, adds verified month metadata,
+applies the established cleaning rules, reuses previous coordinate-to-SA2
+matches, queries only unseen coordinates, replaces the same months on a rerun,
+refreshes the rental-bond analysis and saves updated plots. / 此命令自动发现新月份、
+清洗数据、复用旧 SA2 匹配、只查询新坐标，并重新生成分析和图表；重复运行不会
+重复添加同一个月份。
+
+Updated visual outputs:
+
+- `processed_data/monthly_airbnb_listing_count.png`
+- `processed_data/monthly_airbnb_median_price.png`
+- `processed_data/monthly_airbnb_summary.csv`
+- `processed_data/pipeline_update_summary.json`
+
+See `docs/DELIVERABLE7_AUTOMATION.md` for the orchestration design, safeguards
+and presentation checklist.

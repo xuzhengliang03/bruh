@@ -74,6 +74,8 @@ or the coordinate cache.
    counts, median prices and the short-term-minus-long-term daily price gap.
 10. The joined data, area comparison, written report and concise terminal
     summary are produced.
+11. `update_airbnb_pipeline.py` orchestrates the incremental monthly update,
+    reuses existing SA2 matches, refreshes the analysis and saves current plots.
 
 ## 4. Coding and software strategies
 
@@ -127,6 +129,12 @@ real prices or property counts.
 Source files retain concise docstrings and comments for non-obvious code. The
 pipeline design, methods, commands and interpretation limitations are kept in
 the README and `docs/` rather than repeated block by block inside the code.
+
+### Idempotent automation
+
+New monthly files follow the `YYYY_MM.csv` naming convention. The update
+command replaces rows for those months before appending their refreshed data,
+so running the same command twice does not duplicate listing-month records.
 
 ## Sanity checks
 

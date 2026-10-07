@@ -108,6 +108,7 @@ def main() -> None:
     )
 
     latest_month = listings["month_year"].max()
+    latest_month_label = pd.Period(latest_month, freq="M").strftime("%B %Y")
     latest = joined.loc[joined["month_year"].eq(latest_month)].copy()
     latest_quarter = latest["quarter_start"].iloc[0]
     central = latest.loc[
@@ -166,7 +167,7 @@ def main() -> None:
         f"- Joined listing-month rows: {len(joined):,}; unchanged from Airbnb input.",
         f"- Listing-month rows with a matching ALL/ALL bond record: {int(joined['bond_join_status'].eq('both').sum()):,}.",
         f"- Listing-month rows without a matching bond record: {int(joined['bond_join_status'].eq('left_only').sum()):,}.",
-        f"- Christchurch Central (SA2 {CHRISTCHURCH_CENTRAL_ID}) June 2026 median Airbnb price: NZ${central_median:,.2f} per night, based on {central['price_nzd_per_night'].count():,} priced listings.",
+        f"- Christchurch Central (SA2 {CHRISTCHURCH_CENTRAL_ID}) {latest_month_label} median Airbnb price: NZ${central_median:,.2f} per night, based on {central['price_nzd_per_night'].count():,} priced listings.",
         "",
         "## Largest median short- versus long-term nightly gap",
         "",
@@ -174,7 +175,7 @@ def main() -> None:
     if top is not None:
         label = top["area_name"] if pd.notna(top["area_name"]) else f"SA2 {int(top['location_id'])}"
         report += [
-            f"{label} (SA2 {int(top['location_id'])}) has the largest median gap among areas with at least {MIN_PRICED_LISTINGS_FOR_RANKING} priced June Airbnb listings: NZ${top['median_gap_nzd_per_night']:,.2f} per night.",
+            f"{label} (SA2 {int(top['location_id'])}) has the largest median gap among areas with at least {MIN_PRICED_LISTINGS_FOR_RANKING} priced {latest_month_label} Airbnb listings: NZ${top['median_gap_nzd_per_night']:,.2f} per night.",
             f"Its median Airbnb price is NZ${top['median_airbnb_nzd_per_night']:,.2f}/night and bond median is NZ${top['median_bond_rent_nzd_per_week']:,.2f}/week (NZ${top['median_bond_rent_nzd_per_week']/7:,.2f}/night); {int(top['priced_airbnb_count'])} priced Airbnb listings.",
         ]
     else:
@@ -183,8 +184,8 @@ def main() -> None:
         "",
         "## Counts and interpretation",
         "",
-        f"- June Airbnb listings: {len(latest):,} across {len(areas):,} SA2 areas.",
-        f"- June listings with a matching bond summary: {int(latest['bond_join_status'].eq('both').sum()):,}; without: {int(latest['bond_join_status'].eq('left_only').sum()):,}.",
+        f"- {latest_month_label} Airbnb listings: {len(latest):,} across {len(areas):,} SA2 areas.",
+        f"- {latest_month_label} listings with a matching bond summary: {int(latest['bond_join_status'].eq('both').sum()):,}; without: {int(latest['bond_join_status'].eq('left_only').sum()):,}.",
         "- `area_comparison_latest_month.csv` lists Airbnb counts beside active bonds for each area. Active bonds are a stock measure, while Airbnb counts are observed listings; the two are not identical property populations.",
         "- Bond counts are confidentiality-rounded to base 3, and some bond results are suppressed. Missing bond matches are not zero rental properties.",
         "- Airbnb nightly listing prices are asking prices, not observed bookings. Weekly bond median divided by 7 is only a unit conversion, not an estimate of equivalent whole-property rent.",

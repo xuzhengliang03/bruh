@@ -225,3 +225,5 @@ local_data/
 
 # PyCharm local settings
 .idea/
+# Local Koordinates cache - not a final output
+processed_data/koordinates_sa2_2019_cache.jsonl
