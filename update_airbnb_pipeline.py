@@ -9,6 +9,7 @@ duplicate listing-month rows.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -17,15 +18,27 @@ import subprocess
 import sys
 import tempfile
 
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from clean_airbnb_and_bond_data import clean_listings
+from clean_airbnb_and_bond_data import clean_listings, clean_bonds, markdown_report
 from geocode_airbnb_sa2 import LAYER_ID, coordinate_key, load_cache
+from pipeline_outputs import save_complete_outputs, collect_raw_listings
 
 
 MONTH_FILE_RE = re.compile(r"^(\d{4})_(\d{2})\.csv$")
 SCRAPE_DATES = {
+    "2025-10": "2025-10-05",
+    "2025-11": "2025-11-07",
+    "2025-12": "2025-12-11",
+    "2026-01": "2026-01-16",
+    "2026-02": "2026-02-13",
+    "2026-03": "2026-03-17",
+    "2026-04": "2026-04-16",
+    "2026-05": "2026-05-23",
+    "2026-06": "2026-06-19",
     "2026-07": "2026-07-12",
     "2026-08": "2026-08-13",
 }
@@ -34,11 +47,20 @@ SCRAPE_DATES = {
 def discover_month_files(input_dir: Path) -> list[tuple[Path, str, str]]:
     """Return validated month files with their month and scrape date."""
     discovered: list[tuple[Path, str, str]] = []
+    manifest_path = input_dir / "source_manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.is_file() else {}
     for path in sorted(input_dir.glob("*.csv")):
         match = MONTH_FILE_RE.fullmatch(path.name)
         if not match:
             continue
         month = f"{match.group(1)}-{match.group(2)}"
+        if path.name in manifest:
+            source = manifest[path.name]
+            digest = hashlib.sha256(path.read_bytes()).hexdigest()
+            if digest != source["sha256"] or month != source["month"]:
+                raise ValueError(f"Source identity mismatch for {path.name}; check verified month mapping")
+            if source["scrape_date"] != SCRAPE_DATES.get(month):
+                raise ValueError(f"Scrape date mismatch for {path.name}")
         if month not in SCRAPE_DATES:
             raise ValueError(
                 f"No verified scrape date is configured for {path.name}; "
@@ -173,8 +195,6 @@ def main() -> int:
     parser.add_argument("--workers", type=int, default=4)
     args = parser.parse_args()
 
-    if not os.environ.get("KOORDINATES_API_KEY", "").strip():
-        parser.error("Set KOORDINATES_API_KEY in this terminal first")
     if not 1 <= args.workers <= 8:
         parser.error("--workers must be between 1 and 8")
 
@@ -195,6 +215,12 @@ def main() -> int:
     previous_geocoded = pd.read_csv(geocoded_path, low_memory=False)
     old_clean = previous_clean.loc[~previous_clean["month_year"].isin(new_months)]
     combined_clean = pd.concat([old_clean, new_clean], ignore_index=True)
+    # Use the same coordinate precision as the deterministic CSV writer before
+    # cache checks; otherwise raw high-precision coordinates appear uncached.
+    for coordinate_column in ("latitude", "longitude"):
+        combined_clean[coordinate_column] = combined_clean[coordinate_column].map(
+            lambda value: float("%.6f" % value)
+        )
     combined_clean = combined_clean.sort_values(["month_year", "id"], kind="stable")
     if combined_clean.duplicated(["id", "month_year"]).any():
         raise ValueError("Combined clean data has duplicate listing ID/month rows")
@@ -202,7 +228,24 @@ def main() -> int:
     cache_path = args.processed_dir / "koordinates_sa2_2019_cache.jsonl"
     seeded = seed_cache_from_existing_geocodes(previous_geocoded, cache_path)
     print(f"Seeded {seeded:,} reusable coordinate matches from previous output")
+    cache = load_cache(cache_path)
+    pending = {coordinate_key(lat, lon) for lat, lon in
+               zip(combined_clean["latitude"], combined_clean["longitude"])} - set(cache)
+    if pending and not os.environ.get("KOORDINATES_API_KEY", "").strip():
+        parser.error(f"{len(pending)} new coordinates require KOORDINATES_API_KEY; clean data has not been replaced")
     write_atomically(combined_clean, clean_path)
+    raw_bonds_path = args.input_dir / "Detailed-Quarterly-Tenancy.csv"
+    bond_report = None
+    if raw_bonds_path.is_file():
+        listing_period = dict(new_report, date_min=combined_clean["month_year"].min(),
+                              date_max=combined_clean["month_year"].max())
+        cleaned_bonds, bond_report = clean_bonds(raw_bonds_path, listing_period)
+        write_atomically(cleaned_bonds, bonds_path)
+        (args.processed_dir / "cleaning_summary.json").write_text(
+            json.dumps({"listings": new_report, "rental_bonds": bond_report}, indent=2), encoding="utf-8")
+        (args.processed_dir / "CLEANING_REPORT.md").write_text(
+            markdown_report(new_report, bond_report), encoding="utf-8")
+        print(f"Bond cleaning: {bond_report['rows_before']:,} -> {bond_report['rows_after']:,} rows")
 
     run_checked(
         [
@@ -237,12 +280,27 @@ def main() -> int:
     )
     refreshed = pd.read_csv(geocoded_path, low_memory=False)
     save_monthly_plots(refreshed, args.processed_dir)
+    raw, raw_sources = collect_raw_listings(args.input_dir, SCRAPE_DATES)
+    row_counts = {
+        "previous_clean_rows": len(previous_clean),
+        "rows_replaced": int(previous_clean["month_year"].isin(new_months).sum()),
+        "retained_previous_rows": len(old_clean),
+        "replacement_clean_rows": len(new_clean),
+        "net_row_change": len(refreshed) - len(previous_clean),
+        "raw_month_rows": new_report["rows_before"],
+        "cleaning": new_report,
+        "bond_cleaning": bond_report,
+    }
+    completion = save_complete_outputs(refreshed, raw, raw_sources,
+                                      args.processed_dir, row_counts)
     summary = {
         "updated_months": sorted(new_months),
         "new_clean_rows": int(len(new_clean)),
         "total_listing_month_rows": int(len(refreshed)),
         "latest_month": str(refreshed["month_year"].max()),
         "new_month_cleaning": new_report,
+        "row_counts": row_counts,
+        "completion": completion,
     }
     (args.processed_dir / "pipeline_update_summary.json").write_text(
         json.dumps(summary, indent=2),
@@ -252,6 +310,8 @@ def main() -> int:
     print(f"Latest month: {summary['latest_month']}")
     print(f"Total listing-month rows: {summary['total_listing_month_rows']:,}")
     print(f"Plots saved in: {args.processed_dir}")
+    print(f"Data readiness: {completion['status']}")
+    print(f"Open all plots: {args.processed_dir / 'results_gallery.html'}")
     return 0
 
 

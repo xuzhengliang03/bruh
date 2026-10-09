@@ -1,0 +1,56 @@
+{
+  "status": "AVAILABLE_DATA_CHECKS_PASSED",
+  "missing": [],
+  "raw_sources": [
+    "2025_10.csv",
+    "2025_11.csv",
+    "2025_12.csv",
+    "2026_01.csv",
+    "2026_02.csv",
+    "2026_03.csv",
+    "2026_04.csv",
+    "2026_05.csv",
+    "2026_06.csv",
+    "2026_07.csv",
+    "2026_08.csv"
+  ],
+  "raw_month_coverage": [
+    "2025-10",
+    "2025-11",
+    "2025-12",
+    "2026-01",
+    "2026-02",
+    "2026-03",
+    "2026-04",
+    "2026-05",
+    "2026-06",
+    "2026-07",
+    "2026-08"
+  ],
+  "checks": {
+    "total_rows": 35796,
+    "duplicate_id_month_rows": 0,
+    "missing_sa2_rows": 0,
+    "valid_price_rows": 24478,
+    "price_histogram_rows": 24261,
+    "valid_review_age_rows_available_raw_only": 30738,
+    "bond_matched_rows": 24551,
+    "bond_unmatched_rows": 11245,
+    "valid_price_gap_rows": 15471,
+    "latest_month": "2026-08",
+    "latest_comparable_bond_month": "2026-06"
+  },
+  "latest_review_ranking": {
+    "month": "2026-08",
+    "population": "Christchurch City",
+    "threshold": 184.0,
+    "qualifying_rows": 354,
+    "valid_review_count_rows": 3513,
+    "note": "Ties at threshold can include more than 10%."
+  },
+  "largest_gap": {
+    "month": "2026-06",
+    "location_id": 322600,
+    "median_gap_nzd_per_night": 242.71428571428572
+  }
+}

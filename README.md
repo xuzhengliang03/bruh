@@ -318,7 +318,7 @@ reserved for short explanations of non-obvious logic. / 较长的解释和设计
 
 Download the New Zealand summary `listings.csv` files and save them under
 `local_data/` using `YYYY_MM.csv` names. For the current update the files are
-`2026_07.csv` and `2026_08.csv`. After setting `KOORDINATES_API_KEY`, the whole
+`2026_07.csv` and `2026_08.csv`. With cached coordinates (or `KOORDINATES_API_KEY` for new queries), the whole
 incremental update is one command:
 
 ```powershell
@@ -341,3 +341,8 @@ Updated visual outputs:
 
 See `docs/DELIVERABLE7_AUTOMATION.md` for the orchestration design, safeguards
 and presentation checklist.
+
+
+## VERIFIED MONTH CORRECTION
+
+Download-origin records confirm July 2026 has 3,488 Christchurch listings and a median nightly asking price of NZ$227; August has 3,513 and NZ$224. August Christchurch Central median is NZ$256/night. The previous July/August labels were reversed. Use the regenerated results and [verified source notes](docs/VERIFIED_SOURCE_RECOVERY.md). Open all current plots with `Start-Process .\processed_data\results_gallery.html`. Original data and recovery backups remain local.

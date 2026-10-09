@@ -1,0 +1,14 @@
+column,missing_rows,nonmissing_rows
+id,0,35796
+month_year,0,35796
+scrape_date,0,35796
+neighbourhood,0,35796
+latitude,0,35796
+longitude,0,35796
+room_type,0,35796
+price_nzd_per_night,11318,24478
+has_price,0,35796
+minimum_nights,37,35759
+availability_365,0,35796
+is_available,0,35796
+location_id,0,35796

@@ -1,13 +1,15 @@
 {
   "source_file": "processed_data\\christchurch_listings_clean.csv.gz",
-  "source_sha256": "dcfe5ae83bc84280381e0c0356f60678ef1007b807060668f2569cb820c89b2d",
+  "source_sha256": "30cf7f54c626703df9e9451450e337f689b5ceb8a70fc752ed050067f55ae6ae",
   "layer_id": 98970,
   "sa2_field": "SA22019_V1_00",
   "test_coordinate": {
     "latitude": -43.51148,
     "longitude": 172.59658
   },
-  "test_code": "320800",
+  "test_code": null,
+  "api_test_performed": false,
+  "new_coordinate_requests": 0,
   "listing_rows": 35796,
   "unique_coordinates": 4100,
   "matched_listing_rows": 35796,

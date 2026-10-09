@@ -1,61 +1,50 @@
-# Deliverable 7 automation
+# Automated update and verified source recovery
 
-## Goal
+Run from the project directory: `python .\update_airbnb_pipeline.py`.
 
-Update the previous Christchurch Airbnb pipeline with the July and August 2026
-New Zealand summary downloads using one command.
+The recovery restored eleven New Zealand summary files, October 2025 through
+August 2026. July and August were corrected using original download URLs.
+The command validates the source manifest, applies the existing cleaner,
+replaces matching months, reuses SA2 cache entries, cleans the original bond
+file when present, reruns the bond join and regenerates statistics, plots and
+reports. Completely cached runs need no API key and make no network requests.
 
-## Inputs
+## Verified final data
 
-- `local_data/2026_07.csv` — Inside Airbnb summary `listings.csv` dated
-  12 July 2026.
-- `local_data/2026_08.csv` — Inside Airbnb summary `listings.csv` dated
-  13 August 2026.
-- Existing prepared listings, SA2 matches and rental-bond data in
-  `processed_data/`.
-- `KOORDINATES_API_KEY` in the current terminal session.
+- July: 3,488 Christchurch listings; NZ$227 median nightly asking price.
+- August: 3,513 Christchurch listings; NZ$224 median nightly asking price.
+- Total listing-month rows: 35,796; duplicate ID/month keys: 0.
+- SA2 coordinates cached: 4,100; missing SA2 rows: 0.
+- August Christchurch Central: NZ$256/night, 121 priced listings.
+- Latest comparable bond month: June 2026. Missing August bonds are not zero.
+- August Christchurch top-review threshold: 184 reviews; 354 qualifying
+  listings. Ties at the threshold can include more than 10%.
 
-## One-command update
+## Display all outputs
 
-```powershell
-python .\update_airbnb_pipeline.py
-```
+`Start-Process .\processed_data\results_gallery.html`
 
-## Automated stages
+The gallery contains ten charts: two monthly trends, full-period Christchurch
+price and review-age histograms, June national and Christchurch price
+histograms, June national review-age histogram, matched-month SA2 median-gap
+ranking, price-gap distribution and property-count comparison.
 
-1. Discover files whose names follow `YYYY_MM.csv`.
-2. Attach the verified month and scrape date.
-3. Apply the existing Christchurch cleaning rules.
-4. Replace those months in the previous clean listing dataset, preventing
-   duplicates when the command is rerun.
-5. Build a local coordinate cache from previously geocoded rows.
-6. Run the known-point Koordinates test and query only unseen coordinates.
-7. Re-run the Airbnb/rental-bond comparison using the latest month.
-8. Save updated listing-count and median-price plots plus a monthly table and
-   machine-readable update summary.
+`pipeline_validation_report.md` explains row filtering and usable sample
+counts. `validation_report.json` stores checks and source coverage.
+All eleven raw months are present; the data-source status is
+`AVAILABLE_DATA_CHECKS_PASSED`. This status does not certify Git teamwork,
+Orange demonstration, Māori governance slides, Trello or course questionnaires.
 
-## Safeguards and sanity checks
+## Repeat-run verification
 
-- Required previous outputs must exist before the update starts.
-- Only explicitly configured scrape dates are accepted.
-- Listing ID and month must remain unique.
-- A coordinate cannot map to two different SA2 codes.
-- The known coordinate must return SA2 `320800` before batch requests begin.
-- The existing geocoder and analysis retain their coordinate, row-count and
-  many-to-one join validation.
-- Re-running the command replaces July/August rows instead of appending copies.
+Two corrected-source runs on a project copy completed without an API key.
+Core datasets and monthly summaries had identical SHA256 on the repeat run.
+The old nine-month clean data remained unchanged. Restoring all months
+replaces 35,796 existing rows with 35,796 freshly cleaned rows: net change 0.
+Relative to the original nine-month deliverable, July and August contribute
+7,001 additional listing-month rows.
 
-## Expected interpretation
+## AI assistance
 
-The latest Airbnb month is August 2026. The current cleaned rental-bond input
-does not contain a July 2026 quarter, so August Airbnb rows may have missing
-bond matches. Missing bond values are reported as unavailable, not zero.
-
-## Presentation checklist
-
-- Show the two input files in `local_data/`.
-- Show the single update command.
-- Point out that previous SA2 matches are reused and only new coordinates call
-  the API.
-- Show the successful terminal summary and the two updated PNG plots.
-- Explain the idempotence and duplicate-key sanity check.
+OpenAI Codex drafted changes and documents, checked download metadata and
+ran the comparisons. Review the supplied changes and outputs before submission.

@@ -10,7 +10,8 @@ remains responsible for the final code, methods and documentation.
 
 ### Raw inputs
 
-- Monthly Christchurch Airbnb CSV files stored under `local_data/`.
+- Monthly New Zealand summary Airbnb CSV files stored under `local_data/`,
+  filtered to Christchurch City during processing.
 - `local_data/Detailed-Quarterly-Tenancy.csv`, downloaded from New Zealand
   Tenancy Services.
 
@@ -58,7 +59,8 @@ or the coordinate cache.
 2. `clean_airbnb_and_bond_data.py` validates required columns, standardises
    dates and numeric values, removes invalid or duplicate keys, aligns the
    study period and saves compressed prepared datasets.
-3. `geocode_airbnb_sa2.py` tests one known coordinate before batch processing.
+3. `geocode_airbnb_sa2.py` tests one known coordinate before new API requests.
+   Fully cached runs skip the API test and do not require an API key.
 4. The geocoder extracts unique coordinate pairs, reuses cached results and
    queries only coordinates not already cached.
 5. The returned `SA22019_V1_00` value is stored as the Airbnb `location_id`,
@@ -76,6 +78,16 @@ or the coordinate cache.
     summary are produced.
 11. `update_airbnb_pipeline.py` orchestrates the incremental monthly update,
     reuses existing SA2 matches, refreshes the analysis and saves current plots.
+12. `pipeline_outputs.py` saves raw-field statistics for available months,
+    Christchurch histograms and review rankings, latest matched-month bond
+    comparison charts, balanced row accounting and a local HTML gallery.
+    Missing historical raw months are recorded explicitly. See
+    `docs/PIPELINE_COMPLETION.md` for inputs, outputs and coverage limitations.
+13. When `local_data/source_manifest.json` is present, monthly hashes and
+    dates are checked against verified download identities before processing.
+    If the original quarterly bond CSV is available, its existing cleaner is
+    rerun for the combined listing period. Otherwise the prepared bond input
+    is reused. See `docs/VERIFIED_SOURCE_RECOVERY.md` for the July/August fix.
 
 ## 4. Coding and software strategies
 

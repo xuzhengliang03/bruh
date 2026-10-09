@@ -140,18 +140,14 @@ def main() -> int:
     if not 1 <= args.workers <= 8:
         parser.error("--workers must be between 1 and 8")
     api_key = os.environ.get("KOORDINATES_API_KEY", "").strip()
-    if not api_key:
-        parser.error("Set KOORDINATES_API_KEY in this terminal first")
-
-    # Do not start batch requests unless the known coordinate passes.
-    test_code = query_sa2(api_key, TEST_LATITUDE, TEST_LONGITUDE)
-    print(f"Example point returned SA2 code: {test_code or 'no match'}")
-    if test_code != EXPECTED_TEST_CODE:
-        raise RuntimeError(
-            f"Expected {EXPECTED_TEST_CODE}, received {test_code!r}. "
-            "Check the layer, API key, coordinate order and JSON result before the batch run."
-        )
+    test_code = None
     if args.test_only:
+        if not api_key:
+            parser.error("Set KOORDINATES_API_KEY in this terminal first")
+        test_code = query_sa2(api_key, TEST_LATITUDE, TEST_LONGITUDE)
+        print(f"Example point returned SA2 code: {test_code or 'no match'}")
+        if test_code != EXPECTED_TEST_CODE:
+            raise RuntimeError(f"Expected {EXPECTED_TEST_CODE}, received {test_code!r}")
         print("Single-point test passed; no batch requests were made.")
         return 0
 
@@ -185,6 +181,15 @@ def main() -> int:
         for lat, lon in zip(listings["latitude"], listings["longitude"])
     ))
     pending = [key for key in coordinates if key not in cache]
+    if pending:
+        if not api_key:
+            parser.error(f"{len(pending)} uncached coordinates need KOORDINATES_API_KEY")
+        test_code = query_sa2(api_key, TEST_LATITUDE, TEST_LONGITUDE)
+        if test_code != EXPECTED_TEST_CODE:
+            raise RuntimeError(f"Expected {EXPECTED_TEST_CODE}, received {test_code!r}; batch not started")
+        print(f"Example point returned SA2 code: {test_code}")
+    else:
+        print("All coordinates cached; API test and batch requests skipped.")
     print(f"Listing rows: {len(listings):,}; unique coordinates: {len(coordinates):,}")
     print(f"Cached coordinates: {len(coordinates) - len(pending):,}; API requests remaining: {len(pending):,}")
 
@@ -235,6 +240,8 @@ def main() -> int:
         "sa2_field": CODE_FIELD,
         "test_coordinate": {"latitude": TEST_LATITUDE, "longitude": TEST_LONGITUDE},
         "test_code": test_code,
+        "api_test_performed": bool(pending),
+        "new_coordinate_requests": len(pending),
         "listing_rows": len(listings),
         "unique_coordinates": len(coordinates),
         "matched_listing_rows": int(listings["location_id"].notna().sum()),
