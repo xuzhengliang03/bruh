@@ -11,6 +11,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from processed_layout import ProcessedLayout
+
 
 CHRISTCHURCH_CENTRAL_ID = 326600
 MIN_PRICED_LISTINGS_FOR_RANKING = 10
@@ -73,12 +75,12 @@ def read_sources(listings_path: Path, bonds_path: Path) -> tuple[pd.DataFrame, p
 def main() -> None:
     """Join prepared data, calculate area summaries, and save reports."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--listings", type=Path, default=Path("processed_data/christchurch_listings_with_sa2.csv.gz"))
-    parser.add_argument("--bonds", type=Path, default=Path("processed_data/rental_bond_clean.csv.gz"))
+    parser.add_argument("--listings", type=Path, default=Path("processed_data/datasets/christchurch_listings_with_sa2.csv.gz"))
+    parser.add_argument("--bonds", type=Path, default=Path("processed_data/datasets/rental_bond_clean.csv.gz"))
     parser.add_argument("--output-dir", type=Path, default=Path("processed_data"))
     args = parser.parse_args()
     listings, bonds = read_sources(args.listings, args.bonds)
-    args.output_dir.mkdir(parents=True, exist_ok=True)
+    layout = ProcessedLayout.from_root(args.output_dir, create=True)
 
     # Use overall bond summaries to prevent one listing matching subcategory rows.
     bond_summary = bonds.loc[
@@ -154,9 +156,9 @@ def main() -> None:
         & areas["median_gap_nzd_per_night"].notna()
     ].sort_values("median_gap_nzd_per_night", ascending=False)
 
-    joined_path = args.output_dir / "airbnb_bond_joined.csv.gz"
-    area_path = args.output_dir / "area_comparison_latest_month.csv"
-    report_path = args.output_dir / "airbnb_bond_analysis_report.md"
+    joined_path = layout.datasets / "airbnb_bond_joined.csv.gz"
+    area_path = layout.tables / "area_comparison_latest_month.csv"
+    report_path = layout.reports / "airbnb_bond_analysis_report.md"
     joined.to_csv(joined_path, index=False, compression={"method": "gzip", "compresslevel": 6, "mtime": 0})
     areas.to_csv(area_path, index=False, encoding="utf-8-sig")
     top = eligible.iloc[0] if not eligible.empty else None

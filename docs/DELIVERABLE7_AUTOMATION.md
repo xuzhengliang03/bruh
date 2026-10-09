@@ -29,8 +29,8 @@ price and review-age histograms, June national and Christchurch price
 histograms, June national review-age histogram, matched-month SA2 median-gap
 ranking, price-gap distribution and property-count comparison.
 
-`pipeline_validation_report.md` explains row filtering and usable sample
-counts. `validation_report.json` stores checks and source coverage.
+`processed_data/reports/pipeline_validation_report.md` explains row filtering and usable sample
+counts. `processed_data/statistics/validation_report.json` stores checks and source coverage.
 All eleven raw months are present; the data-source status is
 `AVAILABLE_DATA_CHECKS_PASSED`. This status does not certify Git teamwork,
 Orange demonstration, Māori governance slides, Trello or course questionnaires.

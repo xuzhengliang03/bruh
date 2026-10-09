@@ -17,8 +17,8 @@ remains responsible for the final code, methods and documentation.
 
 ### Prepared inputs
 
-- `processed_data/christchurch_listings_clean.csv.gz`
-- `processed_data/rental_bond_clean.csv.gz`
+- `processed_data/datasets/christchurch_listings_clean.csv.gz`
+- `processed_data/datasets/rental_bond_clean.csv.gz`
 - Stats NZ Statistical Area 2 2019 generalised layer `98970` on Koordinates.
 - A Koordinates API key supplied at runtime through the
   `KOORDINATES_API_KEY` environment variable.
@@ -32,23 +32,23 @@ or the coordinate cache.
 ### Data preparation and cleaning
 
 - Combined monthly Airbnb data under `local_data/`.
-- `processed_data/christchurch_listings_clean.csv.gz`
-- `processed_data/rental_bond_clean.csv.gz`
-- `processed_data/CLEANING_REPORT.md`
-- `processed_data/cleaning_summary.json`
+- `processed_data/datasets/christchurch_listings_clean.csv.gz`
+- `processed_data/datasets/rental_bond_clean.csv.gz`
+- `processed_data/reports/CLEANING_REPORT.md`
+- `processed_data/statistics/cleaning_summary.json`
 
 ### Geocoding
 
-- `processed_data/christchurch_listings_with_sa2.csv.gz`
-- `processed_data/geocoding_report.json`
-- `processed_data/koordinates_sa2_2019_cache.jsonl` as a local intermediate
+- `processed_data/datasets/christchurch_listings_with_sa2.csv.gz`
+- `processed_data/statistics/geocoding_report.json`
+- `processed_data/cache/koordinates_sa2_2019_cache.jsonl` as a local intermediate
   cache, not a final analytical output.
 
 ### Rental comparison
 
-- `processed_data/airbnb_bond_joined.csv.gz`
-- `processed_data/area_comparison_latest_month.csv`
-- `processed_data/airbnb_bond_analysis_report.md`
+- `processed_data/datasets/airbnb_bond_joined.csv.gz`
+- `processed_data/tables/area_comparison_latest_month.csv`
+- `processed_data/reports/airbnb_bond_analysis_report.md`
 - `docs/airbnb_bond_analysis_report.md` as the version-controlled report copy.
 
 ## 3. Main steps

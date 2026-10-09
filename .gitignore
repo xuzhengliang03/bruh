@@ -226,7 +226,7 @@ local_data/
 # PyCharm local settings
 .idea/
 # Local Koordinates cache - not a final output
-processed_data/koordinates_sa2_2019_cache.jsonl
+processed_data/cache/koordinates_sa2_2019_cache.jsonl
 
 # Combined raw-field source remains local
-processed_data/christchurch_available_raw.csv.gz
+processed_data/datasets/christchurch_available_raw.csv.gz

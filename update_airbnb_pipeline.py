@@ -26,6 +26,7 @@ import pandas as pd
 from clean_airbnb_and_bond_data import clean_listings, clean_bonds, markdown_report
 from geocode_airbnb_sa2 import LAYER_ID, coordinate_key, load_cache
 from pipeline_outputs import save_complete_outputs, collect_raw_listings
+from processed_layout import ProcessedLayout
 
 
 MONTH_FILE_RE = re.compile(r"^(\d{4})_(\d{2})\.csv$")
@@ -144,7 +145,7 @@ def seed_cache_from_existing_geocodes(
     return len(additions)
 
 
-def save_monthly_plots(listings: pd.DataFrame, output_dir: Path) -> None:
+def save_monthly_plots(listings: pd.DataFrame, layout: ProcessedLayout) -> None:
     """Save updated count and median-price plots for every available month."""
     monthly = (
         listings.groupby("month_year", sort=True)
@@ -162,7 +163,7 @@ def save_monthly_plots(listings: pd.DataFrame, output_dir: Path) -> None:
     axis.set_ylabel("Unique listings")
     axis.tick_params(axis="x", rotation=45)
     figure.tight_layout()
-    figure.savefig(output_dir / "monthly_airbnb_listing_count.png", dpi=160)
+    figure.savefig(layout.plots / "monthly_airbnb_listing_count.png", dpi=160)
     plt.close(figure)
 
     figure, axis = plt.subplots(figsize=(9, 5))
@@ -172,11 +173,11 @@ def save_monthly_plots(listings: pd.DataFrame, output_dir: Path) -> None:
     axis.set_ylabel("Median nightly price (NZD)")
     axis.tick_params(axis="x", rotation=45)
     figure.tight_layout()
-    figure.savefig(output_dir / "monthly_airbnb_median_price.png", dpi=160)
+    figure.savefig(layout.plots / "monthly_airbnb_median_price.png", dpi=160)
     plt.close(figure)
 
     monthly.to_csv(
-        output_dir / "monthly_airbnb_summary.csv",
+        layout.tables / "monthly_airbnb_summary.csv",
         index=False,
         encoding="utf-8-sig",
     )
@@ -198,10 +199,10 @@ def main() -> int:
     if not 1 <= args.workers <= 8:
         parser.error("--workers must be between 1 and 8")
 
-    args.processed_dir.mkdir(parents=True, exist_ok=True)
-    clean_path = args.processed_dir / "christchurch_listings_clean.csv.gz"
-    geocoded_path = args.processed_dir / "christchurch_listings_with_sa2.csv.gz"
-    bonds_path = args.processed_dir / "rental_bond_clean.csv.gz"
+    layout = ProcessedLayout.from_root(args.processed_dir, create=True)
+    clean_path = layout.datasets / "christchurch_listings_clean.csv.gz"
+    geocoded_path = layout.datasets / "christchurch_listings_with_sa2.csv.gz"
+    bonds_path = layout.datasets / "rental_bond_clean.csv.gz"
     for path in (clean_path, geocoded_path, bonds_path):
         if not path.is_file():
             parser.error(f"Required previous pipeline output not found: {path}")
@@ -225,7 +226,7 @@ def main() -> int:
     if combined_clean.duplicated(["id", "month_year"]).any():
         raise ValueError("Combined clean data has duplicate listing ID/month rows")
 
-    cache_path = args.processed_dir / "koordinates_sa2_2019_cache.jsonl"
+    cache_path = layout.cache / "koordinates_sa2_2019_cache.jsonl"
     seeded = seed_cache_from_existing_geocodes(previous_geocoded, cache_path)
     print(f"Seeded {seeded:,} reusable coordinate matches from previous output")
     cache = load_cache(cache_path)
@@ -241,9 +242,9 @@ def main() -> int:
                               date_max=combined_clean["month_year"].max())
         cleaned_bonds, bond_report = clean_bonds(raw_bonds_path, listing_period)
         write_atomically(cleaned_bonds, bonds_path)
-        (args.processed_dir / "cleaning_summary.json").write_text(
+        (layout.statistics / "cleaning_summary.json").write_text(
             json.dumps({"listings": new_report, "rental_bonds": bond_report}, indent=2), encoding="utf-8")
-        (args.processed_dir / "CLEANING_REPORT.md").write_text(
+        (layout.reports / "CLEANING_REPORT.md").write_text(
             markdown_report(new_report, bond_report), encoding="utf-8")
         print(f"Bond cleaning: {bond_report['rows_before']:,} -> {bond_report['rows_after']:,} rows")
 
@@ -271,7 +272,7 @@ def main() -> int:
             str(args.processed_dir),
         ]
     )
-    generated_report = args.processed_dir / "airbnb_bond_analysis_report.md"
+    generated_report = layout.reports / "airbnb_bond_analysis_report.md"
     report_copy = Path("docs") / "airbnb_bond_analysis_report.md"
     report_copy.parent.mkdir(parents=True, exist_ok=True)
     report_copy.write_text(
@@ -279,7 +280,7 @@ def main() -> int:
         encoding="utf-8",
     )
     refreshed = pd.read_csv(geocoded_path, low_memory=False)
-    save_monthly_plots(refreshed, args.processed_dir)
+    save_monthly_plots(refreshed, layout)
     raw, raw_sources = collect_raw_listings(args.input_dir, SCRAPE_DATES)
     row_counts = {
         "previous_clean_rows": len(previous_clean),
@@ -302,14 +303,14 @@ def main() -> int:
         "row_counts": row_counts,
         "completion": completion,
     }
-    (args.processed_dir / "pipeline_update_summary.json").write_text(
+    (layout.statistics / "pipeline_update_summary.json").write_text(
         json.dumps(summary, indent=2),
         encoding="utf-8",
     )
     print("Pipeline update completed successfully.")
     print(f"Latest month: {summary['latest_month']}")
     print(f"Total listing-month rows: {summary['total_listing_month_rows']:,}")
-    print(f"Plots saved in: {args.processed_dir}")
+    print(f"Plots saved in: {layout.plots}")
     print(f"Data readiness: {completion['status']}")
     print(f"Open all plots: {args.processed_dir / 'results_gallery.html'}")
     return 0

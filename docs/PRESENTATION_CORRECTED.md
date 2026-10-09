@@ -75,7 +75,7 @@ We divide weekly bond rent by seven to put both prices in daily units.
 However, short stays and long-term rentals are different markets, so this
 comparison needs care.
 
-## 7. Show pipeline_validation_report.md
+## 7. Show processed_data/reports/pipeline_validation_report.md
 
 We checked that there are no repeated listing-and-month records and no
 missing area codes. There are 24,478 rows with usable prices and 24,551 rows

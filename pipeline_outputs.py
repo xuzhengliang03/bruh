@@ -14,6 +14,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pandas as pd
 
+from processed_layout import ProcessedLayout
+
 
 def collect_raw_listings(input_dir: Path, dates: dict) -> tuple[pd.DataFrame, list[str]]:
     frames, sources = [], []
@@ -80,24 +82,25 @@ def area_summary(rows: pd.DataFrame) -> pd.DataFrame:
 
 def save_complete_outputs(clean: pd.DataFrame, raw: pd.DataFrame,
                           sources: list[str], output: Path, counts: dict) -> dict:
-    save_stats(clean, "clean_listings", output)
-    bonds = pd.read_csv(output / "rental_bond_clean.csv.gz", low_memory=False)
-    save_stats(bonds, "clean_bonds", output)
-    cleaning_report = output / "CLEANING_REPORT.md"
+    layout = ProcessedLayout.from_root(output, create=True)
+    save_stats(clean, "clean_listings", layout.tables)
+    bonds = pd.read_csv(layout.datasets / "rental_bond_clean.csv.gz", low_memory=False)
+    save_stats(bonds, "clean_bonds", layout.tables)
+    cleaning_report = layout.reports / "CLEANING_REPORT.md"
     if cleaning_report.is_file():
         docs_dir = Path("docs")
         docs_dir.mkdir(parents=True, exist_ok=True)
         (docs_dir / "CLEANING_REPORT.md").write_text(
             cleaning_report.read_text(encoding="utf-8"), encoding="utf-8"
         )
-    joined = pd.read_csv(output / "airbnb_bond_joined.csv.gz", low_memory=False)
+    joined = pd.read_csv(layout.datasets / "airbnb_bond_joined.csv.gz", low_memory=False)
     expected_months = sorted(clean["month_year"].unique())
     missing = []
     price = pd.to_numeric(clean["price_nzd_per_night"], errors="coerce")
     histogram_count = save_hist(price[price.between(0, 1000)],
         "Christchurch asking prices: " + expected_months[0] + " to " + expected_months[-1],
         "Nightly asking price (NZD); display range 0–1,000",
-        output / "christchurch_price_distribution.png", range(0, 1051, 50))
+        layout.plots / "christchurch_price_distribution.png", range(0, 1051, 50))
     valid_review_count = 0
     coverage = []
     review_summary = None
@@ -119,15 +122,15 @@ def save_complete_outputs(clean: pd.DataFrame, raw: pd.DataFrame,
             cc["days_since_last_review"] = days.where(days.ge(0))
             pd.DataFrame({"id": cc["id"], "month_year": cc["month_year"],
                           "days_since_last_review": cc["days_since_last_review"]}).to_csv(
-                output / "review_age_records.csv.gz", index=False, compression="gzip")
+                layout.datasets / "review_age_records.csv.gz", index=False, compression="gzip")
             save_hist(days[days.between(0, 5000)],
                 "Days since last review — " + coverage[0] + " to " + coverage[-1],
                 "Days since last review; display range 0–5,000",
-                output / "days_since_last_review.png", range(0, 5251, 250))
+                layout.plots / "days_since_last_review.png", range(0, 5251, 250))
         else:
             missing.append("Raw sources lack last_review")
-        save_stats(cc, "raw_christchurch", output)
-        cc.to_csv(output / "christchurch_available_raw.csv.gz", index=False,
+        save_stats(cc, "raw_christchurch", layout.tables)
+        cc.to_csv(layout.datasets / "christchurch_available_raw.csv.gz", index=False,
                   compression={"method": "gzip", "mtime": 0})
         if "number_of_reviews" in cc:
             latest = cc.loc[cc["month_year"].eq(expected_months[-1])].copy()
@@ -135,12 +138,12 @@ def save_complete_outputs(clean: pd.DataFrame, raw: pd.DataFrame,
             threshold = reviews.quantile(.9, interpolation="higher")
             if pd.notna(threshold):
                 top = latest.loc[reviews.ge(threshold)]
-                top.to_csv(output / "top_10_percent_reviews_latest.csv", index=False)
+                top.to_csv(layout.tables / "top_10_percent_reviews_latest.csv", index=False)
                 review_summary = {"month": expected_months[-1], "population": "Christchurch City",
                     "threshold": float(threshold), "qualifying_rows": len(top),
                     "valid_review_count_rows": int(reviews.notna().sum()),
                     "note": "Ties at threshold can include more than 10%."}
-                (output / "top_10_percent_reviews_summary.json").write_text(
+                (layout.statistics / "top_10_percent_reviews_summary.json").write_text(
                     json.dumps(review_summary, indent=2), encoding="utf-8")
             else:
                 missing.append("Latest month lacks usable review counts")
@@ -153,18 +156,18 @@ def save_complete_outputs(clean: pd.DataFrame, raw: pd.DataFrame,
             june_price = pd.to_numeric(june["price"], errors="coerce")
             save_hist(june_price[june_price.between(0, 1000)],
                 "New Zealand asking prices — June 2026 baseline", "Nightly asking price (NZD)",
-                output / "new_zealand_price_distribution_june.png", range(0, 1051, 50))
+                layout.plots / "new_zealand_price_distribution_june.png", range(0, 1051, 50))
             june_cc = june.loc[june["neighbourhood_group"].eq("Christchurch City")]
             june_cc_prices = pd.to_numeric(june_cc["price"], errors="coerce")
             save_hist(june_cc_prices[june_cc_prices.between(0, 1000)],
                 "Christchurch asking prices — June 2026 baseline", "Nightly asking price (NZD)",
-                output / "christchurch_price_distribution_june.png", range(0, 1051, 50))
+                layout.plots / "christchurch_price_distribution_june.png", range(0, 1051, 50))
             national_review_days = (pd.to_datetime(june["scrape_date"], errors="coerce") -
                 pd.to_datetime(june["last_review"], errors="coerce")).dt.days
             save_hist(national_review_days[national_review_days.between(0, 5000)],
                 "New Zealand days since last review — June 2026 baseline",
                 "Days since last review; display range 0–5,000",
-                output / "new_zealand_review_age_june.png", range(0, 5251, 250))
+                layout.plots / "new_zealand_review_age_june.png", range(0, 5251, 250))
             reviews = pd.to_numeric(june["number_of_reviews"], errors="coerce")
             threshold = reviews.quantile(.9, interpolation="higher")
             national_top = june.loc[reviews.ge(threshold)]
@@ -172,7 +175,7 @@ def save_complete_outputs(clean: pd.DataFrame, raw: pd.DataFrame,
                 "threshold": None if pd.isna(threshold) else float(threshold),
                 "qualifying_rows": len(national_top),
                 "christchurch_rows": int(national_top["neighbourhood_group"].eq("Christchurch City").sum())}
-            (output / "national_top_reviews_june.json").write_text(
+            (layout.statistics / "national_top_reviews_june.json").write_text(
                 json.dumps(national_result, indent=2), encoding="utf-8")
         else:
             missing.append("Week 4 New Zealand June baseline requires original 2026_06.csv or saved Orange evidence")
@@ -186,7 +189,7 @@ def save_complete_outputs(clean: pd.DataFrame, raw: pd.DataFrame,
         comparable_month = matched["month_year"].max()
         comparable = joined.loc[joined["month_year"].eq(comparable_month)]
         areas = area_summary(comparable)
-        areas.to_csv(output / "area_comparison_latest_matched_month.csv", index=False)
+        areas.to_csv(layout.tables / "area_comparison_latest_matched_month.csv", index=False)
         eligible = areas.loc[areas["valid_gap_count"].ge(10)].sort_values(
             "median_gap_nzd_per_night", ascending=False)
         if not eligible.empty:
@@ -198,18 +201,18 @@ def save_complete_outputs(clean: pd.DataFrame, raw: pd.DataFrame,
             ax.set(title=f"Largest median nightly asking-price gaps — {comparable_month} (>=10 valid gaps)",
                    xlabel="SA2-2019 code (top 20; full table saved)", ylabel="Airbnb minus bond weekly rent / 7 (NZD)")
             ax.tick_params(axis="x", rotation=90)
-            fig.tight_layout(); fig.savefig(output / "sa2_median_price_gap.png", dpi=160); plt.close(fig)
+            fig.tight_layout(); fig.savefig(layout.plots / "sa2_median_price_gap.png", dpi=160); plt.close(fig)
         save_hist(comparable["price_gap_nzd_per_night"],
             f"Nightly asking-price gap distribution — {comparable_month}",
             "Airbnb asking price minus bond weekly median / 7 (NZD)",
-            output / "airbnb_bond_price_gap_distribution.png")
+            layout.plots / "airbnb_bond_price_gap_distribution.png")
         plot_counts = areas.loc[areas["active_bonds"].notna()].sort_values(
             "airbnb_listing_count", ascending=False).head(20).set_index("location_id")
         if not plot_counts.empty:
             ax = plot_counts[["airbnb_listing_count", "active_bonds"]].plot.bar(figsize=(12, 6))
             ax.set(title=f"Observed Airbnb listings and active bonds — {comparable_month}",
                    xlabel="SA2-2019 code (top 20; different property populations)", ylabel="Count (bond counts rounded)")
-            ax.figure.tight_layout(); ax.figure.savefig(output / "sa2_property_count_comparison.png", dpi=160)
+            ax.figure.tight_layout(); ax.figure.savefig(layout.plots / "sa2_property_count_comparison.png", dpi=160)
             plt.close(ax.figure)
     else:
         missing.append("No month has matching bond summaries")
@@ -229,7 +232,7 @@ def save_complete_outputs(clean: pd.DataFrame, raw: pd.DataFrame,
               "missing": missing, "raw_sources": sources, "raw_month_coverage": coverage,
               "checks": checks, "latest_review_ranking": review_summary,
               "largest_gap": largest_gap}
-    (output / "validation_report.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
+    (layout.statistics / "validation_report.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
     lines = ["# Pipeline results and row accounting", "", f"Status: {result['status']}", "",
         "## Row accounting", "", *[f"- {k}: {v}" for k, v in counts.items() if k not in {"cleaning", "bond_cleaning"}],
         "", "## Cleaning decisions for refreshed raw months", "",
@@ -244,7 +247,7 @@ def save_complete_outputs(clean: pd.DataFrame, raw: pd.DataFrame,
         "", "## Missing inputs", "", *(missing or ["None for implemented data analyses."]),
         "", "## Interpretation", "", "Missing prices or bond matches are not zero. Review statistics cover only the listed raw months. Price histogram limits apply to display only; high prices remain in the clean data. Bond rent divided by seven is a unit conversion across different rental markets.",
         "", "## Manual course evidence", "", "Git collaboration, Orange workflow demonstration, Māori data-governance slides, Trello and Week 12 questionnaires require separate evidence. Data checks do not certify these tasks."]
-    (output / "pipeline_validation_report.md").write_text("\n".join(lines), encoding="utf-8")
+    (layout.reports / "pipeline_validation_report.md").write_text("\n".join(lines), encoding="utf-8")
     chart_names = ["monthly_airbnb_listing_count.png", "monthly_airbnb_median_price.png",
         "christchurch_price_distribution.png", "days_since_last_review.png",
         "new_zealand_price_distribution_june.png", "christchurch_price_distribution_june.png",
@@ -254,10 +257,10 @@ def save_complete_outputs(clean: pd.DataFrame, raw: pd.DataFrame,
         '<style>body{font:18px Arial;max-width:1100px;margin:30px auto;padding:20px}img{width:100%;border:1px solid #ccc}section{margin:40px 0}</style>',
         '<h1>Airbnb pipeline results</h1>', f'<p>Status: {html.escape(result["status"])}</p>',
         '<ul>' + ''.join('<li>' + html.escape(m) + '</li>' for m in missing) + '</ul>',
-        '<p><a href="pipeline_validation_report.md">Row counts and checks</a> · <a href="airbnb_bond_analysis_report.md">Bond analysis</a></p>']
+        '<p><a href="reports/pipeline_validation_report.md">Row counts and checks</a> · <a href="reports/airbnb_bond_analysis_report.md">Bond analysis</a></p>']
     for name in chart_names:
-        if (output / name).is_file():
-            gallery.append(f'<section><h2>{html.escape(name)}</h2><img src="{name}" alt="{html.escape(name)}"></section>')
+        if (layout.plots / name).is_file():
+            gallery.append(f'<section><h2>{html.escape(name)}</h2><img src="plots/{name}" alt="{html.escape(name)}"></section>')
     (output / "results_gallery.html").write_text('\n'.join(gallery), encoding="utf-8")
     print("Final checks:", json.dumps(checks))
     for item in missing:

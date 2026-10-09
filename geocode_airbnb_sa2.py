@@ -21,6 +21,8 @@ from urllib.request import Request, urlopen
 
 import pandas as pd
 
+from processed_layout import ProcessedLayout
+
 
 ENDPOINT = "https://datafinder.stats.govt.nz/services/query/v1/vector.json"
 LAYER_ID = 98970  # Stats NZ Statistical Area 2 2019 (generalised)
@@ -132,7 +134,7 @@ def load_cache(path: Path) -> dict[str, str | None]:
 def main() -> int:
     """Validate one point, geocode uncached coordinates, and save outputs."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input", type=Path, default=Path("processed_data/christchurch_listings_clean.csv.gz"))
+    parser.add_argument("--input", type=Path, default=Path("processed_data/datasets/christchurch_listings_clean.csv.gz"))
     parser.add_argument("--output-dir", type=Path, default=Path("processed_data"))
     parser.add_argument("--workers", type=int, default=4, help="Concurrent API requests; default 4")
     parser.add_argument("--test-only", action="store_true", help="Check the known example point, then stop")
@@ -171,10 +173,10 @@ def main() -> int:
         parser.error("Input contains out-of-range coordinates")
 
     # Query each unique coordinate once and reuse cached results.
-    args.output_dir.mkdir(parents=True, exist_ok=True)
-    cache_path = args.output_dir / "koordinates_sa2_2019_cache.jsonl"
-    output_path = args.output_dir / "christchurch_listings_with_sa2.csv.gz"
-    report_path = args.output_dir / "geocoding_report.json"
+    layout = ProcessedLayout.from_root(args.output_dir, create=True)
+    cache_path = layout.cache / "koordinates_sa2_2019_cache.jsonl"
+    output_path = layout.datasets / "christchurch_listings_with_sa2.csv.gz"
+    report_path = layout.statistics / "geocoding_report.json"
     cache = load_cache(cache_path)
     coordinates = list(dict.fromkeys(
         coordinate_key(lat, lon)

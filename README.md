@@ -177,6 +177,12 @@ Deliverable 4 对 Deliverable 3 生成的 Christchurch Airbnb 房源数据和 Te
 - Python dependencies / Python 依赖：`requirements.txt`
 - Clean datasets / 清洗后的数据：saved locally in `processed_data/` and not uploaded to GitHub / 保存在本地 `processed_data/` 文件夹，不上传至 GitHub
 
+Generated files are organised by purpose: `processed_data/datasets`, `tables`,
+`statistics`, `plots`, `reports`, and `cache`. The local entry page remains at
+`processed_data/results_gallery.html` and uses relative links to the report and
+plot subfolders. / 生成文件按用途存放在上述六个子目录中；本地入口页面仍为
+`processed_data/results_gallery.html`，并使用相对路径加载报告和图片。
+
 ### Time Period / 时间范围
 
 - Airbnb listings / Airbnb 房源：October 2025 to June 2026 / 2025 年 10 月至 2026 年 6 月
@@ -246,11 +252,11 @@ The rental bond data is published by the Ministry of Business, Innovation and Em
 
 ### Files / 文件
 
-- `geocode_airbnb_sa2.py`: queries Stats NZ SA2-2019 for each unique Airbnb coordinate, caches responses locally and saves `processed_data/christchurch_listings_with_sa2.csv.gz`. / 查询每个不同坐标的 SA2-2019 区号，并保存新增区域编号的房源数据。
+- `geocode_airbnb_sa2.py`: queries Stats NZ SA2-2019 for each unique Airbnb coordinate, caches responses locally and saves `processed_data/datasets/christchurch_listings_with_sa2.csv.gz`. / 查询每个不同坐标的 SA2-2019 区号，并保存新增区域编号的房源数据。
 - `analyse_airbnb_bonds.py`: joins Airbnb listing-month rows to quarterly bond summaries and writes the joined file, area comparison and analysis report. / 按区域及季度连接两份数据，输出连接表、各区域比较及分析报告。
-- `processed_data/airbnb_bond_joined.csv.gz`: listing-level left-join output, retaining all 28,795 Airbnb listing-month rows. / 保留全部 28,795 条房源月份记录的左连接结果。
-- `processed_data/area_comparison_latest_month.csv`: latest-month Airbnb counts, prices and active bond counts by SA2; currently updated through August 2026. / 按 SA2 汇总最新月份的房源数量、价格及活跃押金数量；当前已更新至 2026 年 8 月。
-- `processed_data/airbnb_bond_analysis_report.md`: detailed methods, findings and limitations. / 方法、结果及限制说明。
+- `processed_data/datasets/airbnb_bond_joined.csv.gz`: listing-level left-join output, retaining all 28,795 Airbnb listing-month rows. / 保留全部 28,795 条房源月份记录的左连接结果。
+- `processed_data/tables/area_comparison_latest_month.csv`: latest-month Airbnb counts, prices and active bond counts by SA2; currently updated through August 2026. / 按 SA2 汇总最新月份的房源数量、价格及活跃押金数量；当前已更新至 2026 年 8 月。
+- `processed_data/reports/airbnb_bond_analysis_report.md`: detailed methods, findings and limitations. / 方法、结果及限制说明。
 - `docs/airbnb_bond_analysis_report.md`: version-controlled copy of the analysis report for review on GitHub. / 供 GitHub 查看和评分的报告副本。
 
 ### Method and findings / 方法与结果
@@ -265,7 +271,7 @@ Airbnb asking prices and bond rents measure different markets. Bond `active_bond
 
 ### Re-run / 重新运行
 
-From the project folder, with pandas installed, run `python .\analyse_airbnb_bonds.py`. It reads the two prepared compressed datasets in `processed_data/` and regenerates the joined dataset and summaries. Re-running `geocode_airbnb_sa2.py` requires a Koordinates API key in the **session-only** `KOORDINATES_API_KEY` environment variable; the saved geocoded dataset means those queries are not required just to reproduce the analysis. Never put the key in source code, README, screenshots or Git. / 在项目目录安装 pandas 后运行 `python .\analyse_airbnb_bonds.py`，即可由两份已处理压缩数据重建连接数据和分析结果。只有重新进行地理查询时才需要在当前终端设置 `KOORDINATES_API_KEY`；不要将密钥放进代码、README、截图或 Git。
+From the project folder, with pandas installed, run `python .\analyse_airbnb_bonds.py`. It reads the two prepared compressed datasets in `processed_data/datasets/` and regenerates the joined dataset and summaries. Re-running `geocode_airbnb_sa2.py` requires a Koordinates API key in the **session-only** `KOORDINATES_API_KEY` environment variable; the saved geocoded dataset means those queries are not required just to reproduce the analysis. Never put the key in source code, README, screenshots or Git. / 在项目目录安装 pandas 后运行 `python .\analyse_airbnb_bonds.py`，即可由 `processed_data/datasets/` 中的两份已处理压缩数据重建连接数据和分析结果。只有重新进行地理查询时才需要在当前终端设置 `KOORDINATES_API_KEY`；不要将密钥放进代码、README、截图或 Git。
 
 Sources / 来源：[Tenancy Services rental bond data](https://www.tenancy.govt.nz/about-tenancy-services/data-and-statistics/rental-bond-data/), [Stats NZ SA2-2019 layer](https://datafinder.stats.govt.nz/layer/98970-statistical-area-2-2019-generalised/), [Stats NZ SA2 names](https://statsnz.contentdm.oclc.org/digital/api/collection/p20045coll24/id/980/download).
 
@@ -334,10 +340,10 @@ refreshes the rental-bond analysis and saves updated plots. / 此命令自动发
 
 Updated visual outputs:
 
-- `processed_data/monthly_airbnb_listing_count.png`
-- `processed_data/monthly_airbnb_median_price.png`
-- `processed_data/monthly_airbnb_summary.csv`
-- `processed_data/pipeline_update_summary.json`
+- `processed_data/plots/monthly_airbnb_listing_count.png`
+- `processed_data/plots/monthly_airbnb_median_price.png`
+- `processed_data/tables/monthly_airbnb_summary.csv`
+- `processed_data/statistics/pipeline_update_summary.json`
 
 See `docs/DELIVERABLE7_AUTOMATION.md` for the orchestration design, safeguards
 and presentation checklist.
