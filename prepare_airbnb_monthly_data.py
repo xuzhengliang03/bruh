@@ -1,9 +1,16 @@
+"""Combine monthly Inside Airbnb files for Christchurch City.
+
+Input CSV files are read from ``local_data``. The combined local dataset and
+the two exploratory plots are written without changing the source downloads.
+See ``docs/DESIGN_PRINCIPLES.md`` for the full pipeline explanation.
+"""
+
 from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
 
 
-# 数据文件夹和每个文件对应的月份
+# Source directory and month represented by each download.
 DATA_DIR = Path(__file__).parent / "local_data"
 
 FILES = {
@@ -18,7 +25,7 @@ FILES = {
     "2026_06.csv": "2026-06",
 }
 
-# 每个月数据的实际发布日期
+# Actual Inside Airbnb scrape date for each monthly file.
 SCRAPE_DATES = {
     "2025-10": "2025-10-05",
     "2025-11": "2025-11-07",
@@ -31,7 +38,7 @@ SCRAPE_DATES = {
     "2026-06": "2026-06-19",
 }
 
-# 读取每个月的数据，只保留 Christchurch City
+# Load each month and retain Christchurch City listings.
 all_months = []
 
 for filename, month_year in FILES.items():
@@ -42,17 +49,15 @@ for filename, month_year in FILES.items():
         df["neighbourhood_group"] == "Christchurch City"
     ].copy()
 
-    # 添加月份
     christchurch["month_year"] = month_year
     christchurch["scrape_date"] = SCRAPE_DATES[month_year]
     all_months.append(christchurch)
 
     print(filename, "Christchurch rows:", len(christchurch))
 
-# 合并九个月的数据
+# Combine all monthly rows before calculating cross-month fields.
 combined = pd.concat(all_months, ignore_index=True)
 
-# 计算距离最后一次评论的天数
 combined["scrape_date"] = pd.to_datetime(combined["scrape_date"])
 combined["last_review"] = pd.to_datetime(
     combined["last_review"],
@@ -66,7 +71,7 @@ combined["days_since_last_review"] = (
 print("Total Christchurch rows:", len(combined))
 print("Total columns:", len(combined.columns))
 
-# 保存合并后的 CSV 文件
+# Keep the combined source local because it is too large for the repository.
 output_file = DATA_DIR / "christchurch_2025_10_to_2026_06.csv"
 combined.to_csv(output_file, index=False, encoding="utf-8-sig")
 

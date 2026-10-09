@@ -154,7 +154,7 @@ For June 2026, the top 10% review threshold was 184 reviews.在 2026 年 6 月�
 
 Files / 文件说明
 
-Python analysis code / Python 分析代码：deliverable3.py
+Python preparation code / Python 数据准备代码：`prepare_airbnb_monthly_data.py`
 
 Local combined dataset / 本地合并数据：christchurch_2025_10_to_2026_06.csv
 
@@ -162,171 +162,6 @@ The large CSV datasets are stored locally and are not uploaded to GitHub.
 
 大型 CSV 数据保存在每位组员的本地电脑中，不上传到 GitHub。
 
-
------------------------------week7-------------------------------------------------------------
-# DATA201/422 Group Project
-
-## Team Members
-
-- Kaicheng Wu (Kai)
-- Zhijian Zhang (Phoenix)
-- Zhenliang Xu (Green)
-- Xiaowen Zhu
-
-## Deliverable 2: New Zealand Airbnb Analysis
-
-This project uses Orange Data Mining to analyse Airbnb listings in New Zealand.
-
-本项目使用 Orange Data Mining 分析新西兰 Airbnb 房源数据。
-
-## Dataset
-
-- Source: Inside Airbnb
-- Website: https://beta.insideairbnb.com/get-the-data/
-- Country: New Zealand
-- Date: 19 June 2026
-- File: `listings.csv`
-- Number of listings: 50,932
-
-The dataset is saved locally and is not uploaded to GitHub because it is a large file.
-
-数据集保存在每位组员的电脑中，不上传到 GitHub。
-
-## Column Descriptions
-
-| Column | Simple Description |
-|---|---|
-| `id` | Unique ID of the listing（房源编号） |
-| `name` | Name of the listing（房源名称） |
-| `host_id` | Unique ID of the host（房东编号） |
-| `host_name` | Name of the host（房东名称） |
-| `neighbourhood_group` | City or district, such as Christchurch City（城市或地区） |
-| `neighbourhood` | Smaller local area or neighbourhood（社区或街区） |
-| `latitude` | North–south location（纬度） |
-| `longitude` | East–west location（经度） |
-| `room_type` | Type of room or property（房间类型） |
-| `price` | Daily price in local currency（每日价格） |
-| `minimum_nights` | Minimum nights required（最少入住晚数） |
-| `number_of_reviews` | Total number of reviews（评论总数） |
-| `last_review` | Date of the latest review（最近评论日期） |
-| `reviews_per_month` | Average reviews per month（每月平均评论数） |
-| `calculated_host_listings_count` | Number of listings owned by the host in this dataset（房东的房源数量） |
-| `availability_365` | Available days during the next 365 days（未来一年可订天数） |
-| `number_of_reviews_ltm` | Reviews received during the last 12 months（过去12个月评论数） |
-| `license` | Licence or registration information（许可证信息） |
-
-Some listing and host names contain Chinese, Korean, Māori, or other languages. These are normal values and are not encoding errors.
-
-部分房源名称包含中文、韩文或毛利语，这是正常数据，不是乱码。
-
-## Orange Workflow
-
-The workflow file is:
-
-`Deliverable_2_Orange_Workflow.ows`
-
-### 1. New Zealand Price Distribution
-
-We created a histogram of Airbnb prices across New Zealand.
-
-To make the chart easier to read, we selected listings with:
-
-`price <= 1000`
-
-This keeps approximately 95% of listings with valid prices. The histogram uses a bin width of 50.
-
-为了避免极端价格把图表拉得太长，我们只显示价格不超过 1000 的房源。
-
-### 2. Christchurch Price Distribution
-
-We selected:
-
-`neighbourhood_group = Christchurch City`
-
-There are 3,166 Christchurch listings with a valid price of no more than 1,000.
-
-我们使用相同的价格范围，绘制 Christchurch City 的价格分布图。
-
-### 3. Days Since the Last Review
-
-We created a new variable:
-
-`days_since_last_review`
-
-The formula is:
-
-`(1781827200 - last_review) / 86400`
-
-- `1781827200` represents 19 June 2026.
-- `86400` is the number of seconds in one day.
-
-这个变量表示从最后一次评论到数据发布日期相隔多少天。
-
-Listings without a review date were treated as missing. Negative values were removed because some review dates occurred shortly after the nominal dataset date.
-
-没有评论日期的房源显示为空值；小于 0 的结果不用于绘图。
-
-### 4. Top 10% by Number of Reviews
-
-The 90th-percentile threshold is:
-
-`number_of_reviews >= 185`
-
-This produces 5,130 listings, which is approximately 10% of the full dataset.
-
-评论数达到 185 或以上的房源被视为评论数量最高的前 10%。
-
-Among these highly reviewed listings:
-
-**343 listings are located in Christchurch City.**
-
-其中有 **343 个房源位于 Christchurch City**。
-
-## Important Notes
-
-- Do not upload `listings.csv` to GitHub.
-- The Orange `.ows` workflow can be uploaded.
-- Each team member needs their own local copy of the dataset.
-
-注意：CSV 数据文件不要上传到 GitHub，但 Orange workflow 可以上传。
-
-Deliverable 3: Christchurch Airbnb Analysis
-
-This analysis uses nine New Zealand Airbnb datasets from October 2025 to June 2026.
-
-本次分析使用了从 2025 年 10 月到 2026 年 6 月的九个月新西兰 Airbnb 数据。
-
-Data Processing / 数据处理
-
-Filtered all datasets to Christchurch City only.所有数据只保留 Christchurch City 的房源。
-
-Added month_year and scrape_date columns.添加月份年份和数据发布日期两列。
-
-Combined nine monthly datasets into one dataset.将九个月的数据合并为一个数据集。
-
-The combined dataset contains 28,795 rows and 21 columns.合并后的数据共有 28,795 行和 21 列。
-
-Calculated missing values and summary statistics for all columns.计算每一列的缺失值和汇总统计数据。
-
-Analysis Results / 分析结果
-
-Created a Christchurch Airbnb price distribution histogram.制作了 Christchurch Airbnb 价格分布直方图。
-
-Created a histogram showing days since the last review.计算距离最后一次评论的天数并制作直方图。
-
-For June 2026, the top 10% review threshold was 184 reviews.在 2026 年 6 月的数据中，评论数量前 10% 的门槛是至少 184 条评论。
-
-347 Christchurch listings were in the top 10%.共有 347 个 Christchurch 房源进入评论数量前 10%。
-
-Files / 文件说明
-
-Python analysis code / Python 分析代码：deliverable3.py
-
-Local combined dataset / 本地合并数据：christchurch_2025_10_to_2026_06.csv
-
-The large CSV datasets are stored locally and are not uploaded to GitHub.
-
-大型 CSV 数据保存在每位组员的本地电脑中，不上传到 GitHub。
 
 -------------------------------week7----------------------------------------------
 
@@ -338,9 +173,15 @@ Deliverable 4 对 Deliverable 3 生成的 Christchurch Airbnb 房源数据和 Te
 
 ### Files / 文件
 
-- Cleaning code / 清洗代码：`deliverable4.py`
+- Cleaning code / 清洗代码：`clean_airbnb_and_bond_data.py`
 - Python dependencies / Python 依赖：`requirements.txt`
 - Clean datasets / 清洗后的数据：saved locally in `processed_data/` and not uploaded to GitHub / 保存在本地 `processed_data/` 文件夹，不上传至 GitHub
+
+Generated files are organised by purpose: `processed_data/datasets`, `tables`,
+`statistics`, `plots`, `reports`, and `cache`. The local entry page remains at
+`processed_data/results_gallery.html` and uses relative links to the report and
+plot subfolders. / 生成文件按用途存放在上述六个子目录中；本地入口页面仍为
+`processed_data/results_gallery.html`，并使用相对路径加载报告和图片。
 
 ### Time Period / 时间范围
 
@@ -388,12 +229,14 @@ Install the dependency in `requirements.txt`, download the Tenancy Services deta
 
 安装 `requirements.txt` 中的依赖，下载 Tenancy Services 的季度详细数据，然后运行：
 
-```bash
-python deliverable4.py \
-  --listing-input local_data/christchurch_2025_10_to_2026_06.csv \
-  --bond-input local_data/Detailed-Quarterly-Tenancy.csv \
-  --output-dir processed_data
+```powershell
+python .\clean_airbnb_and_bond_data.py --listing-input .\local_data\christchurch_2025_10_to_2026_06.csv --bond-input .\local_data\Detailed-Quarterly-Tenancy.csv --output-dir .\processed_data
 ```
+
+The command must be run from the project root. Its two input paths are
+`local_data/christchurch_2025_10_to_2026_06.csv` and
+`local_data/Detailed-Quarterly-Tenancy.csv`; its output directory is
+`processed_data/`. / 此命令须从项目根目录运行。两个输入文件和输出目录均已在命令中明确写出。
 
 ### Data Sources / 数据来源
 
@@ -409,24 +252,103 @@ The rental bond data is published by the Ministry of Business, Innovation and Em
 
 ### Files / 文件
 
-- `deliverable5_geocode.py`: queries Stats NZ SA2-2019 for each unique Airbnb coordinate, caches responses locally and saves `processed_data/christchurch_listings_with_sa2.csv.gz`. / 查询每个不同坐标的 SA2-2019 区号，并保存新增区域编号的房源数据。
-- `deliverable5_analysis.py`: joins Airbnb listing-month rows to quarterly bond summaries and writes the joined file, area comparison and analysis report. / 按区域及季度连接两份数据，输出连接表、各区域比较及分析报告。
-- `processed_data/airbnb_bond_joined.csv.gz`: listing-level left-join output, retaining all 28,795 Airbnb listing-month rows. / 保留全部 28,795 条房源月份记录的左连接结果。
-- `processed_data/area_comparison_latest_month.csv`: June 2026 Airbnb counts, prices and active bond counts by SA2. / 按 SA2 汇总的 2026 年 6 月房源数量、价格及活跃押金数量。
-- `processed_data/deliverable5_results.md`: detailed methods, findings and limitations. / 方法、结果及限制说明。
+- `geocode_airbnb_sa2.py`: queries Stats NZ SA2-2019 for each unique Airbnb coordinate, caches responses locally and saves `processed_data/datasets/christchurch_listings_with_sa2.csv.gz`. / 查询每个不同坐标的 SA2-2019 区号，并保存新增区域编号的房源数据。
+- `analyse_airbnb_bonds.py`: joins Airbnb listing-month rows to quarterly bond summaries and writes the joined file, area comparison and analysis report. / 按区域及季度连接两份数据，输出连接表、各区域比较及分析报告。
+- `processed_data/datasets/airbnb_bond_joined.csv.gz`: listing-level left-join output, retaining all 28,795 Airbnb listing-month rows. / 保留全部 28,795 条房源月份记录的左连接结果。
+- `processed_data/tables/area_comparison_latest_month.csv`: latest-month Airbnb counts, prices and active bond counts by SA2; currently updated through August 2026. / 按 SA2 汇总最新月份的房源数量、价格及活跃押金数量；当前已更新至 2026 年 8 月。
+- `processed_data/reports/airbnb_bond_analysis_report.md`: detailed methods, findings and limitations. / 方法、结果及限制说明。
+- `docs/airbnb_bond_analysis_report.md`: version-controlled copy of the analysis report for review on GitHub. / 供 GitHub 查看和评分的报告副本。
 
 ### Method and findings / 方法与结果
 
 The bond source uses **SA2-2019** definitions, so the Koordinates layer `98970` (Statistical Area 2 2019, generalised) was used. Longitude is `x`, latitude is `y`; the single-point test returned SA2 `320800`. All 3,953 unique coordinates were queried and all 28,795 Airbnb rows received a `location_id`. / 押金数据使用 **SA2-2019** 定义，因此选用 Koordinates 图层 `98970`。`x` 为经度、`y` 为纬度；单点测试返回 `320800`。共查询 3,953 个不同坐标，28,795 条房源记录均获得区域编号。
 
 Airbnb months were mapped to calendar quarters. The bond table contains detail and subtotal rows, so only `dwelling_type=ALL` and `number_of_beds=ALL` were joined. A many-to-one **left join** retains Airbnb rows without a bond match; missing bond results must not be treated as zero. / 将 Airbnb 月份映射至自然季度；押金表只使用两个分类均为 `ALL` 的总计行，再按 `location_id` 和季度进行多对一左连接。无押金匹配的房源仍保留，缺失值不能解释为零。
-
+### Original Deliverable 5 result / Deliverable 5 原始结果
 For June 2026, Christchurch Central (SA2 `326600`) has a median Airbnb asking price of **NZ$250 per night** from 117 priced listings. Among SA2 areas with at least 10 priced Airbnb listings, Holmwood (`322600`) has the largest median Airbnb-minus-bond-rent gap, **NZ$242.71 per night**, after converting weekly bond median rent to a nightly figure by dividing by seven. / 2026 年 6 月，Christchurch Central（`326600`）117 条有价格房源的挂牌价中位数为 **每晚 NZ$250**。在至少有 10 条有价格房源的区域中，Holmwood（`322600`）的短租挂牌价减去长期租赁周租金除以七所得差值中位数最大，为 **每晚 NZ$242.71**。
 
 Airbnb asking prices and bond rents measure different markets. Bond `active_bonds` is a rounded stock measure, not an exact count of comparable properties; absent or suppressed bond records are not zeros. The generalised SA2 polygons can misclassify points near boundaries. / Airbnb 挂牌价与长期租金并非完全可比；`active_bonds` 是经过保密取整的存量指标，不是可直接对应的准确房屋数量；缺失或被抑制的押金记录不是零。简化版 SA2 边界可能影响边界附近的房源。
 
 ### Re-run / 重新运行
 
-From the project folder, with pandas installed, run `python deliverable5_analysis.py`. It reads the two prepared compressed datasets in `processed_data/` and regenerates the joined dataset and summaries. Re-running `deliverable5_geocode.py` requires a Koordinates API key in the **session-only** `KOORDINATES_API_KEY` environment variable; the saved geocoded dataset means those queries are not required just to reproduce the analysis. Never put the key in source code, README, screenshots or Git. / 在项目目录安装 pandas 后运行 `python deliverable5_analysis.py`，即可由两份已处理压缩数据重建连接数据和分析结果。只有重新进行地理查询时才需要在当前终端设置 `KOORDINATES_API_KEY`；不要将密钥放进代码、README、截图或 Git。
+From the project folder, with pandas installed, run `python .\analyse_airbnb_bonds.py`. It reads the two prepared compressed datasets in `processed_data/datasets/` and regenerates the joined dataset and summaries. Re-running `geocode_airbnb_sa2.py` requires a Koordinates API key in the **session-only** `KOORDINATES_API_KEY` environment variable; the saved geocoded dataset means those queries are not required just to reproduce the analysis. Never put the key in source code, README, screenshots or Git. / 在项目目录安装 pandas 后运行 `python .\analyse_airbnb_bonds.py`，即可由 `processed_data/datasets/` 中的两份已处理压缩数据重建连接数据和分析结果。只有重新进行地理查询时才需要在当前终端设置 `KOORDINATES_API_KEY`；不要将密钥放进代码、README、截图或 Git。
 
 Sources / 来源：[Tenancy Services rental bond data](https://www.tenancy.govt.nz/about-tenancy-services/data-and-statistics/rental-bond-data/), [Stats NZ SA2-2019 layer](https://datafinder.stats.govt.nz/layer/98970-statistical-area-2-2019-generalised/), [Stats NZ SA2 names](https://statsnz.contentdm.oclc.org/digital/api/collection/p20045coll24/id/980/download).
+
+## Deliverable 6: Code review and design principles
+
+For Deliverable 6, we reviewed the cleaning, geocoding and analysis
+pipeline using the coding practices discussed in Week 9.
+
+Documents:
+
+- [Week 9 code review notes](docs/WEEK9_CODE_REVIEW.md)
+- [Pipeline design principles](docs/DESIGN_PRINCIPLES.md)
+
+The primary sanity check can be run with:
+
+`python .\geocode_airbnb_sa2.py --test-only`
+
+The analysis can be reproduced with:
+
+`python .\analyse_airbnb_bonds.py`
+
+### Koordinates API key: where it is used / API 密钥在哪里使用
+
+Only `geocode_airbnb_sa2.py` reads `KOORDINATES_API_KEY`. The key authenticates
+requests to Koordinates layer `98970`; the cleaning and analysis scripts do not
+use it. The key is held only in the current terminal session and is never written
+to a project file. / 只有 `geocode_airbnb_sa2.py` 读取此密钥，用于访问 Koordinates
+图层 `98970`。清洗和分析代码不使用密钥，密钥仅保存在当前终端会话中。
+
+```powershell
+$secret = Read-Host 'Paste Koordinates API key' -AsSecureString
+$env:KOORDINATES_API_KEY = [System.Net.NetworkCredential]::new('', $secret).Password
+python .\geocode_airbnb_sa2.py --test-only
+```
+
+### Descriptive script names / 直观的代码文件名
+
+| Pipeline stage | Script |
+|---|---|
+| Prepare monthly Airbnb data | `prepare_airbnb_monthly_data.py` |
+| Clean Airbnb and rental-bond data | `clean_airbnb_and_bond_data.py` |
+| Match Airbnb coordinates to SA2 | `geocode_airbnb_sa2.py` |
+| Analyse Airbnb and rental bonds | `analyse_airbnb_bonds.py` |
+
+Long explanations and design decisions are kept in `docs/`; code comments are
+reserved for short explanations of non-obvious logic. / 较长的解释和设计决定放在
+`docs/`，代码内只保留解释必要逻辑的简短注释。
+
+## Deliverable 7: automated monthly update / 月度自动更新
+
+Download the New Zealand summary `listings.csv` files and save them under
+`local_data/` using `YYYY_MM.csv` names. For the current update the files are
+`2026_07.csv` and `2026_08.csv`. With cached coordinates (or `KOORDINATES_API_KEY` for new queries), the whole
+incremental update is one command:
+
+```powershell
+python .\update_airbnb_pipeline.py
+```
+
+The command discovers the new month files, adds verified month metadata,
+applies the established cleaning rules, reuses previous coordinate-to-SA2
+matches, queries only unseen coordinates, replaces the same months on a rerun,
+refreshes the rental-bond analysis and saves updated plots. / 此命令自动发现新月份、
+清洗数据、复用旧 SA2 匹配、只查询新坐标，并重新生成分析和图表；重复运行不会
+重复添加同一个月份。
+
+Updated visual outputs:
+
+- `processed_data/plots/monthly_airbnb_listing_count.png`
+- `processed_data/plots/monthly_airbnb_median_price.png`
+- `processed_data/tables/monthly_airbnb_summary.csv`
+- `processed_data/statistics/pipeline_update_summary.json`
+
+See `docs/DELIVERABLE7_AUTOMATION.md` for the orchestration design, safeguards
+and presentation checklist.
+
+
+## VERIFIED MONTH CORRECTION
+
+Download-origin records confirm July 2026 has 3,488 Christchurch listings and a median nightly asking price of NZ$227; August has 3,513 and NZ$224. August Christchurch Central median is NZ$256/night. The previous July/August labels were reversed. Use the regenerated results and [verified source notes](docs/VERIFIED_SOURCE_RECOVERY.md). Open all current plots with `Start-Process .\processed_data\results_gallery.html`. Original data and recovery backups remain local.

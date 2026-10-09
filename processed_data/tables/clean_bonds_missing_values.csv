@@ -1,0 +1,14 @@
+column,missing_rows,nonmissing_rows
+timeframe,0,27212
+location_id,94,27118
+location_id_status,0,27212
+dwelling_type,0,27212
+number_of_beds,0,27212
+total_bonds,0,27212
+active_bonds,0,27212
+closed_bonds,0,27212
+median_rent_nzd_per_week,94,27118
+geometric_mean_rent_nzd_per_week,94,27118
+upper_quartile_rent_nzd_per_week,94,27118
+lower_quartile_rent_nzd_per_week,94,27118
+log_std_dev_weekly_rent,94,27118

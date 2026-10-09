@@ -1,0 +1,25 @@
+column,value,count
+timeframe,2025-10-01,9459
+timeframe,2026-01-01,9255
+timeframe,2026-04-01,8498
+location_id_status,valid,26991
+location_id_status,source_special_code,127
+location_id_status,missing,94
+dwelling_type,ALL,13057
+dwelling_type,House,11770
+dwelling_type,Apartment,1100
+dwelling_type,Flat,741
+dwelling_type,Room,288
+dwelling_type,Boarding House,256
+number_of_beds,ALL,10782
+number_of_beds,1,7066
+number_of_beds,3,4264
+number_of_beds,2,2570
+number_of_beds,4,1301
+number_of_beds,Unknown,890
+number_of_beds,5+,280
+number_of_beds,5,37
+number_of_beds,6,14
+number_of_beds,9,4
+number_of_beds,0,2
+number_of_beds,7,2
