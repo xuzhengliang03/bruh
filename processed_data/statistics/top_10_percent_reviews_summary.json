@@ -1,0 +1,8 @@
+{
+  "month": "2026-08",
+  "population": "Christchurch City",
+  "threshold": 184.0,
+  "qualifying_rows": 354,
+  "valid_review_count_rows": 3513,
+  "note": "Ties at threshold can include more than 10%."
+}

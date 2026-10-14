@@ -1,0 +1,47 @@
+column,value,count
+month_year,2026-08,3513
+month_year,2026-07,3488
+month_year,2026-06,3469
+month_year,2026-05,3361
+month_year,2026-04,3273
+month_year,2026-03,3227
+month_year,2026-02,3190
+month_year,2025-12,3180
+month_year,2026-01,3057
+month_year,2025-11,3047
+month_year,2025-10,2991
+scrape_date,2026-08-13,3513
+scrape_date,2026-07-12,3488
+scrape_date,2026-06-19,3469
+scrape_date,2026-05-23,3361
+scrape_date,2026-04-16,3273
+scrape_date,2026-03-17,3227
+scrape_date,2026-02-13,3190
+scrape_date,2025-12-11,3180
+scrape_date,2026-01-16,3057
+scrape_date,2025-11-07,3047
+scrape_date,2025-10-05,2991
+neighbourhood,Central Ward,13214
+neighbourhood,Banks Peninsula Ward,4358
+neighbourhood,Heathcote Ward,2562
+neighbourhood,Riccarton Ward,2318
+neighbourhood,Fendalton Ward,1949
+neighbourhood,Halswell Ward,1369
+neighbourhood,Spreydon Ward,1310
+neighbourhood,Innes Ward,1288
+neighbourhood,Cashmere Ward,1243
+neighbourhood,Coastal Ward,1119
+neighbourhood,Harewood Ward,1118
+neighbourhood,Waimairi Ward,1104
+neighbourhood,Linwood Ward,835
+neighbourhood,Papanui Ward,800
+neighbourhood,Hornby Ward,747
+neighbourhood,Burwood Ward,462
+room_type,Entire home/apt,28291
+room_type,Private room,7161
+room_type,Hotel room,301
+room_type,Shared room,43
+has_price,True,24478
+has_price,False,11318
+is_available,True,34212
+is_available,False,1584

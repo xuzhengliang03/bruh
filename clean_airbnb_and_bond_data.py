@@ -13,6 +13,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from processed_layout import ProcessedLayout
+
 
 LISTING_REQUIRED = {
     "id",
@@ -332,22 +334,22 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    args.output_dir.mkdir(parents=True, exist_ok=True)
+    layout = ProcessedLayout.from_root(args.output_dir, create=True)
 
     listings, listing_report = clean_listings(args.listing_input)
     bonds, bond_report = clean_bonds(args.bond_input, listing_report)
 
     gzip_options = {"method": "gzip", "compresslevel": 9, "mtime": 0}
-    listing_output = args.output_dir / "christchurch_listings_clean.csv.gz"
-    bond_output = args.output_dir / "rental_bond_clean.csv.gz"
+    listing_output = layout.datasets / "christchurch_listings_clean.csv.gz"
+    bond_output = layout.datasets / "rental_bond_clean.csv.gz"
     listings.to_csv(listing_output, index=False, compression=gzip_options, float_format="%.6f")
     bonds.to_csv(bond_output, index=False, compression=gzip_options, float_format="%.6f")
 
     summary = {"listings": listing_report, "rental_bonds": bond_report}
-    (args.output_dir / "cleaning_summary.json").write_text(
+    (layout.statistics / "cleaning_summary.json").write_text(
         json.dumps(summary, indent=2, ensure_ascii=False, allow_nan=False), encoding="utf-8"
     )
-    (args.output_dir / "CLEANING_REPORT.md").write_text(
+    (layout.reports / "CLEANING_REPORT.md").write_text(
         markdown_report(listing_report, bond_report), encoding="utf-8"
     )
 
